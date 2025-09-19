@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import ScrollFloat from "@/components/ScrollFloat";
 import heroImage from "@/assets/hero-beach-party.jpg";
 import unnelogo from "@/assets/unne-logo.png";
 
@@ -42,16 +41,12 @@ export const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
         
         {/* Main Text Block */}
         <div className="bg-white/95 backdrop-blur-sm rounded-lg p-8 shadow-card border-l-4 border-accent">
-          <ScrollFloat
-            containerClassName="text-3xl md:text-4xl lg:text-5xl font-montserrat font-bold text-foreground mb-6 leading-tight"
-            animationDuration={1.5}
-            ease="power2.out"
-            scrollStart="top center"
-            scrollEnd="bottom center"
-            stagger={0.05}
-          >
-            Ajude para termos uma festa de ano novo divertida, com segurança e em família!
-          </ScrollFloat>
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-montserrat font-bold text-foreground mb-6 leading-tight">
+            Ajude para termos uma festa de ano novo{" "}
+            <span className="text-primary">divertida</span>,{" "}
+            <span className="text-primary">com segurança</span> e{" "}
+            <span className="text-primary">em família</span>!
+          </h1>
           
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
             Participe da arrecadação para garantir uma celebração inesquecível na praia de Camburi
