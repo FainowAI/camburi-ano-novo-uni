@@ -49,7 +49,7 @@ export const GallerySection = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {images.map((image, index) => (
               <div key={index} className="group">
-                <div className="relative overflow-hidden rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105">
+                <div className="relative bg-black p-4 rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105">
                   <GlowingEffect
                     disabled={false}
                     proximity={100}
@@ -57,12 +57,15 @@ export const GallerySection = () => {
                     blur={2}
                     movementDuration={1.5}
                     borderWidth={2}
+                    variant="white"
                   />
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    className="w-full h-80 object-cover"
-                  />
+                  <div className="overflow-hidden rounded-lg">
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      className="w-full h-80 object-cover"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
