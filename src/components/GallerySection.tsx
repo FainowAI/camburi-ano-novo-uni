@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Instagram } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
+import Aurora from "@/components/Aurora";
 import festa1 from "@/assets/festa-1.jpg";
 import festa2 from "@/assets/festa-2.jpg";
 import festa3 from "@/assets/festa-3.jpg";
@@ -49,7 +50,13 @@ export const GallerySection = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {images.map((image, index) => (
               <div key={index} className="group">
-                <div className="relative bg-black p-4 rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105">
+                <div className="relative p-4 rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105 overflow-hidden">
+                  <Aurora 
+                    colorStops={['#8b5cf6', '#a855f7', '#9333ea']}
+                    amplitude={0.8}
+                    blend={0.6}
+                    speed={0.5}
+                  />
                   <GlowingEffect
                     disabled={false}
                     proximity={100}
@@ -59,7 +66,7 @@ export const GallerySection = () => {
                     borderWidth={2}
                     variant="white"
                   />
-                  <div className="overflow-hidden rounded-lg">
+                  <div className="relative z-10 overflow-hidden rounded-lg">
                     <img
                       src={image.src}
                       alt={image.alt}
