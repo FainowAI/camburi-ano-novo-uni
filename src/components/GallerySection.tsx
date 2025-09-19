@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import festa1 from "@/assets/festa-1.jpg";
 import festa2 from "@/assets/festa-2.jpg";
 import festa3 from "@/assets/festa-3.jpg";
@@ -12,7 +11,6 @@ const images = [
 ];
 
 export const GallerySection = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -31,14 +29,6 @@ export const GallerySection = () => {
     return () => observer.disconnect();
   }, []);
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
   return (
     <section id="gallery-section" className="py-20 bg-gradient-section">
       <div className="container mx-auto px-6">
@@ -50,51 +40,21 @@ export const GallerySection = () => {
           </h2>
         </div>
 
-        {/* Carousel */}
-        <div className={`relative max-w-4xl mx-auto mb-12 transition-all duration-1000 delay-300 transform ${
+        {/* Images Grid */}
+        <div className={`max-w-4xl mx-auto mb-12 transition-all duration-1000 delay-300 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
-          <div className="relative overflow-hidden rounded-lg shadow-card">
-            <div
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {images.map((image, index) => (
-                <div key={index} className="min-w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {images.map((image, index) => (
+              <div key={index} className="group">
+                <div className="overflow-hidden rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105">
                   <img
                     src={image.src}
                     alt={image.alt}
-                    className="w-full h-96 object-cover"
+                    className="w-full h-80 object-cover"
                   />
                 </div>
-              ))}
-            </div>
-            
-            {/* Navigation Arrows */}
-            <button
-              onClick={prevSlide}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full transition-all duration-200 hover:scale-110"
-            >
-              <ChevronLeft className="w-6 h-6 text-foreground" />
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full transition-all duration-200 hover:scale-110"
-            >
-              <ChevronRight className="w-6 h-6 text-foreground" />
-            </button>
-          </div>
-
-          {/* Dots Indicator */}
-          <div className="flex justify-center mt-6 space-x-2">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`w-3 h-3 rounded-full transition-colors duration-200 ${
-                  index === currentIndex ? 'bg-primary' : 'bg-muted'
-                }`}
-              />
+              </div>
             ))}
           </div>
         </div>
