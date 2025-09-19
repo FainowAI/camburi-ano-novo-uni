@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Instagram } from "lucide-react";
 import festa1 from "@/assets/festa-1.jpg";
 import festa2 from "@/assets/festa-2.jpg";
 import festa3 from "@/assets/festa-3.jpg";
@@ -63,13 +64,16 @@ export const GallerySection = () => {
         <div className={`text-center transition-all duration-1000 delay-500 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
+          <h3 className="text-2xl font-montserrat font-semibold text-foreground mb-6">
+            Venha conhecer mais a <span className="text-primary">UNNE</span>
+          </h3>
           <Button
             variant="outline"
             size="lg"
             className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-montserrat font-semibold px-8 py-3 transition-all duration-300 hover:scale-105"
             onClick={() => window.open('https://instagram.com/unnecambury', '_blank')}
           >
-            Ver mais no Instagram da UNNE
+            <Instagram className="w-6 h-6" />
           </Button>
         </div>
       </div>
