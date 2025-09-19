@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Heart } from "lucide-react";
+import ScrollFloat from "@/components/ScrollFloat";
 
 export const DonationForm = () => {
   const [formData, setFormData] = useState({
@@ -53,9 +54,16 @@ export const DonationForm = () => {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
             <Heart className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h2 className="text-4xl font-montserrat font-bold text-foreground mb-4">
-              Faça Parte desta <span className="text-primary">Causa</span>
-            </h2>
+            <ScrollFloat
+              containerClassName="text-4xl font-montserrat font-bold text-foreground mb-4"
+              animationDuration={1.3}
+              ease="back.inOut(1.8)"
+              scrollStart="center bottom+=50%"
+              scrollEnd="bottom bottom-=50%"
+              stagger={0.05}
+            >
+              Faça Parte desta Causa
+            </ScrollFloat>
             <p className="text-lg text-muted-foreground">
               Sua contribuição ajuda a manter Camburi como o paraíso que todos amamos
             </p>

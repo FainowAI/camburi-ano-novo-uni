@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Shield, Waves, Sparkles, Heart } from "lucide-react";
+import ScrollFloat from "@/components/ScrollFloat";
 
 export const MissionSection = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -49,9 +50,16 @@ export const MissionSection = () => {
         <div className={`text-center mb-16 transition-all duration-1000 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
-          <h2 className="text-4xl font-montserrat font-bold text-foreground mb-8">
-            Nossa <span className="text-primary">Missão</span>
-          </h2>
+          <ScrollFloat
+            containerClassName="text-4xl font-montserrat font-bold text-foreground mb-8"
+            animationDuration={1.2}
+            ease="back.inOut(2)"
+            scrollStart="center bottom+=40%"
+            scrollEnd="bottom bottom-=40%"
+            stagger={0.06}
+          >
+            Nossa Missão
+          </ScrollFloat>
           
           <div className="max-w-4xl mx-auto">
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
@@ -61,9 +69,17 @@ export const MissionSection = () => {
             </p>
             
             <div className="bg-unne-light-green/20 border-l-4 border-primary p-8 rounded-lg mb-12">
-              <blockquote className="text-2xl md:text-3xl font-montserrat font-semibold text-primary leading-relaxed">
+              <ScrollFloat
+                containerClassName="text-2xl md:text-3xl font-montserrat font-semibold text-primary leading-relaxed"
+                textClassName="text-2xl md:text-3xl"
+                animationDuration={1}
+                ease="elastic.out(1, 0.3)"
+                scrollStart="center bottom+=30%"
+                scrollEnd="bottom bottom-=30%"
+                stagger={0.02}
+              >
                 "Quem ama cuida do paraíso Cambury!"
-              </blockquote>
+              </ScrollFloat>
             </div>
           </div>
         </div>
