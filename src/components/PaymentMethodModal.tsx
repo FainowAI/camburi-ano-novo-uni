@@ -1,61 +1,75 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CreditCard, Calendar } from "lucide-react";
+import { CreditCard, Calendar, QrCode } from "lucide-react";
 
 interface PaymentMethodModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelectOneTime: () => void;
   onSelectInstallment: () => void;
+  onSelectPix: () => void;
 }
 
 export const PaymentMethodModal = ({ 
   open, 
   onOpenChange, 
   onSelectOneTime, 
-  onSelectInstallment 
+  onSelectInstallment,
+  onSelectPix 
 }: PaymentMethodModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-gray-800 border-gray-700">
+      <DialogContent className="sm:max-w-4xl bg-gray-800 border-gray-700">
         <DialogHeader>
-          <DialogTitle className="text-white text-center">
+          <DialogTitle className="text-white text-center text-xl mb-4">
             Escolha a forma de pagamento
           </DialogTitle>
         </DialogHeader>
         
-        <div className="grid gap-4 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+          {/* À Vista */}
           <Button
             onClick={onSelectOneTime}
-            className="flex flex-col items-center gap-3 h-20 bg-white hover:bg-gray-100 text-gray-900 text-lg font-semibold p-4"
+            className="flex flex-col items-center gap-3 h-32 bg-white hover:bg-gray-100 text-gray-900 font-semibold p-4 rounded-xl transition-all duration-200 hover:scale-105"
           >
-            <div className="flex items-center gap-2">
-              <CreditCard className="w-6 h-6" />
-              <span>À vista</span>
-            </div>
+            <CreditCard className="w-8 h-8 text-green-600" />
             <div className="text-center">
+              <div className="text-lg font-bold">À vista</div>
               <div className="text-2xl font-bold text-green-600">R$ 900,00</div>
               <div className="text-sm font-normal text-gray-600">Pagamento único</div>
             </div>
           </Button>
           
+          {/* Parcelado */}
           <Button
             onClick={onSelectInstallment}
             variant="outline"
-            className="flex flex-col items-center gap-3 h-20 border-gray-600 text-white hover:bg-gray-700 text-lg font-semibold p-4"
+            className="flex flex-col items-center gap-3 h-32 border-2 border-blue-500 text-white hover:bg-blue-500/10 font-semibold p-4 rounded-xl transition-all duration-200 hover:scale-105"
           >
-            <div className="flex items-center gap-2">
-              <Calendar className="w-6 h-6" />
-              <span>Parcelado</span>
-            </div>
+            <Calendar className="w-8 h-8 text-blue-400" />
             <div className="text-center">
+              <div className="text-lg font-bold">Parcelado</div>
               <div className="text-2xl font-bold text-blue-400">3x R$ 300,00</div>
               <div className="text-sm font-normal text-gray-400">Sem juros mensais</div>
             </div>
           </Button>
+
+          {/* PIX */}
+          <Button
+            onClick={onSelectPix}
+            variant="outline"
+            className="flex flex-col items-center gap-3 h-32 border-2 border-purple-500 text-white hover:bg-purple-500/10 font-semibold p-4 rounded-xl transition-all duration-200 hover:scale-105"
+          >
+            <QrCode className="w-8 h-8 text-purple-400" />
+            <div className="text-center">
+              <div className="text-lg font-bold">PIX</div>
+              <div className="text-2xl font-bold text-purple-400">R$ 900,00</div>
+              <div className="text-sm font-normal text-gray-400">Pagamento instantâneo</div>
+            </div>
+          </Button>
         </div>
         
-        <p className="text-gray-400 text-xs text-center">
+        <p className="text-gray-400 text-xs text-center mt-4">
           * No pagamento parcelado, o valor será cobrado mensalmente por 3 meses
         </p>
       </DialogContent>

@@ -117,6 +117,14 @@ export const DonationForm = () => {
     }
   };
 
+  const handlePixPayment = () => {
+    setShowPaymentModal(false);
+    toast({
+      title: "PIX em desenvolvimento",
+      description: "A opção PIX estará disponível em breve!",
+    });
+  };
+
   const handleInputChange = (field: string, value: string) => {
     if (field === 'cpf') {
       value = formatCPF(value);
@@ -267,6 +275,7 @@ export const DonationForm = () => {
         onOpenChange={setShowPaymentModal}
         onSelectOneTime={handleOneTimePayment}
         onSelectInstallment={handleInstallmentPayment}
+        onSelectPix={handlePixPayment}
       />
     </section>
   );
