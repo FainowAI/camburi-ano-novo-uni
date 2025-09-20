@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Heart, Users } from "lucide-react";
 import heroImage from "@/assets/hero-beach-party.jpg";
 import unnelogo from "@/assets/unne-logo.png";
 
@@ -41,6 +42,19 @@ export const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
         
         {/* Main Text Block */}
         <div className="bg-white/95 backdrop-blur-sm rounded-lg p-8 shadow-card border-l-4 border-accent">
+          {/* Contador e Badge VIP */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
+              <Users className="w-4 h-4 text-primary" />
+              <span className="text-sm font-montserrat font-semibold text-primary">
+                127 pessoas já se comprometeram!
+              </span>
+            </div>
+            <div className="bg-gradient-to-r from-accent to-accent/80 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+              ⭐ VIP Camburi
+            </div>
+          </div>
+
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-montserrat font-bold text-foreground mb-6 leading-tight">
             Ajude para termos uma festa de ano novo{" "}
             <span className="text-primary">divertida</span>,{" "}
@@ -49,15 +63,16 @@ export const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
           </h1>
           
           <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Participe da arrecadação para garantir uma celebração inesquecível na praia de Camburi
+            Participe agora da arrecadação para garantir uma celebração inesquecível na NOSSA praia de Camburi
           </p>
           
           <Button
             onClick={onScrollToForm}
             size="lg"
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-montserrat font-semibold px-8 py-3 shadow-button transition-all duration-300 hover:scale-105"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground font-montserrat font-semibold px-8 py-3 shadow-button transition-all duration-300 hover:scale-105 animate-pulse-slow"
           >
-            Participe
+            <Heart className="w-5 h-5 mr-2" />
+            Participe Hoje
           </Button>
         </div>
       </div>

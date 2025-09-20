@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { HeroSection } from "@/components/HeroSection";
 import { GallerySection } from "@/components/GallerySection";
 import { MissionSection } from "@/components/MissionSection";
+import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { DonationForm } from "@/components/DonationForm";
 
 const Index = () => {
@@ -14,8 +15,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background font-montserrat">
       <HeroSection onScrollToForm={scrollToForm} />
-      <GallerySection />
+      <GallerySection onScrollToForm={scrollToForm} />
       <MissionSection />
+      <TestimonialsSection />
       <div ref={formRef}>
         <DonationForm />
       </div>
