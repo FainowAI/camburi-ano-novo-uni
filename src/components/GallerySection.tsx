@@ -57,7 +57,7 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
-        const response = await fetch(`https://eddduafponbimicjownw.supabase.co/rest/v1/photos?order=id`, {
+        const response = await fetch(`https://eddduafponbimicjownw.supabase.co/rest/v1/photos?select=*&order=id`, {
           headers: {
             'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZGR1YWZwb25iaW1pY2pvd253Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNTc4OTMsImV4cCI6MjA3MzkzMzg5M30.pbXwnw9Gf0k3HI31WkHHByc79JrwmFri0IWDKfsw-K4',
             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZGR1YWZwb25iaW1pY2pvd253Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNTc4OTMsImV4cCI6MjA3MzkzMzg5M30.pbXwnw9Gf0k3HI31WkHHByc79JrwmFri0IWDKfsw-K4'
