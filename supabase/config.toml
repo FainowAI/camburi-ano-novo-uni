@@ -2,3 +2,9 @@ project_id = "eddduafponbimicjownw"
 
 [functions.create-payment]
 verify_jwt = false
+
+[functions.manage-installments]
+verify_jwt = false
+
+[functions.check-subscription-status]
+verify_jwt = false

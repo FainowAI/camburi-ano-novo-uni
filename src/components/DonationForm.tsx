@@ -39,18 +39,19 @@ export const DonationForm = () => {
     setShowPaymentModal(true);
   };
 
-  const handleCardPayment = async () => {
+  const handleOneTimePayment = async () => {
     setShowPaymentModal(false);
     setIsSubmitting(true);
 
     try {
-      console.log("Initiating Stripe payment with data:", formData);
+      console.log("Initiating one-time Stripe payment with data:", formData);
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           name: formData.name,
           email: formData.email,
-          cpf: formData.cpf
+          cpf: formData.cpf,
+          payment_mode: "one_time"
         }
       });
 
@@ -66,7 +67,7 @@ export const DonationForm = () => {
       }
 
     } catch (error) {
-      console.error("Error creating payment:", error);
+      console.error("Error creating one-time payment:", error);
       toast({
         title: "Erro no pagamento",
         description: "Não foi possível processar o pagamento. Tente novamente.",
@@ -77,12 +78,43 @@ export const DonationForm = () => {
     }
   };
 
-  const handlePixPayment = () => {
+  const handleInstallmentPayment = async () => {
     setShowPaymentModal(false);
-    toast({
-      title: "PIX em desenvolvimento",
-      description: "A opção PIX estará disponível em breve!",
-    });
+    setIsSubmitting(true);
+
+    try {
+      console.log("Initiating installment Stripe payment with data:", formData);
+      
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          cpf: formData.cpf,
+          payment_mode: "installment"
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log("Installment payment session created:", data);
+      
+      // Redirecionar para Stripe Checkout
+      if (data.url) {
+        window.open(data.url, '_blank');
+      }
+
+    } catch (error) {
+      console.error("Error creating installment payment:", error);
+      toast({
+        title: "Erro no pagamento parcelado",
+        description: "Não foi possível processar o pagamento parcelado. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -135,11 +167,18 @@ export const DonationForm = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
             
             <div className="relative z-10">
-              {/* Preço destacado */}
+              {/* Preço destacado com opções */}
               <div className="mb-8">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-5xl font-bold text-white">R$900</span>
-                  <span className="text-gray-400 text-lg">/ contribuição</span>
+                <div className="text-center">
+                  <div className="mb-2">
+                    <span className="text-5xl font-bold text-white">R$900</span>
+                    <span className="text-gray-400 text-lg ml-2">à vista</span>
+                  </div>
+                  <div className="text-gray-400">
+                    <span className="text-sm">ou </span>
+                    <span className="text-2xl font-semibold text-blue-400">3x R$300</span>
+                    <span className="text-sm"> sem juros</span>
+                  </div>
                 </div>
               </div>
 
@@ -226,8 +265,8 @@ export const DonationForm = () => {
       <PaymentMethodModal
         open={showPaymentModal}
         onOpenChange={setShowPaymentModal}
-        onSelectCard={handleCardPayment}
-        onSelectPix={handlePixPayment}
+        onSelectOneTime={handleOneTimePayment}
+        onSelectInstallment={handleInstallmentPayment}
       />
     </section>
   );
