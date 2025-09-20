@@ -48,7 +48,7 @@ export const PaymentMethodModal = ({
           >
             <Calendar className="w-8 h-8 text-blue-400" />
             <div className="text-center">
-              <div className="text-lg font-bold">Parcelado</div>
+              <div className="text-lg font-bold text-blue-400">Parcelado</div>
               <div className="text-2xl font-bold text-blue-400">3x R$ 300,00</div>
               <div className="text-sm font-normal text-gray-400">Sem juros mensais</div>
             </div>
@@ -62,7 +62,7 @@ export const PaymentMethodModal = ({
           >
             <QrCode className="w-8 h-8 text-purple-400" />
             <div className="text-center">
-              <div className="text-lg font-bold">PIX</div>
+              <div className="text-lg font-bold text-purple-400">PIX</div>
               <div className="text-2xl font-bold text-purple-400">R$ 900,00</div>
               <div className="text-sm font-normal text-gray-400">Pagamento instantâneo</div>
             </div>
