@@ -193,6 +193,21 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
           </div>
         </div>
 
+        {/* Instagram Button Below Photos */}
+        <div className={`text-center mb-16 transition-all duration-1000 delay-400 transform ${
+          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+        }`}>
+          <Button
+            variant="outline"
+            size="lg"
+            className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-montserrat font-semibold px-8 py-3 transition-all duration-300 hover:scale-105"
+            onClick={() => window.open('https://www.instagram.com/unnecambury/', '_blank')}
+          >
+            <Instagram className="w-6 h-6 mr-2" />
+            Siga no Instagram
+          </Button>
+        </div>
+
         {/* Depoimentos */}
         <div className={`max-w-4xl mx-auto mb-16 transition-all duration-1000 delay-500 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
