@@ -157,7 +157,10 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {photos.map((image, index) => (
               <div key={index} className="group">
-                <div className="relative p-4 rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105 overflow-hidden">
+                <div 
+                  className="relative p-4 rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105 overflow-hidden cursor-pointer"
+                  onClick={() => window.open('https://www.instagram.com/unnecambury/?hl=en', '_blank')}
+                >
                   {!isMobile && (
                     <>
                       <Aurora 
@@ -201,7 +204,7 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
             variant="outline"
             size="lg"
             className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-montserrat font-semibold px-8 py-3 transition-all duration-300 hover:scale-105"
-            onClick={() => window.open('https://www.instagram.com/unnecambury/', '_blank')}
+            onClick={() => window.open('https://www.instagram.com/unnecambury/?hl=en', '_blank')}
           >
             <Instagram className="w-6 h-6 mr-2" />
             Siga no Instagram
@@ -270,7 +273,7 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
             variant="outline"
             size="lg"
             className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-montserrat font-semibold px-8 py-3 transition-all duration-300 hover:scale-105"
-            onClick={() => window.open('https://www.instagram.com/unnecambury/', '_blank')}
+            onClick={() => window.open('https://www.instagram.com/unnecambury/?hl=en', '_blank')}
           >
             <Instagram className="w-6 h-6 mr-2" />
             Siga no Instagram
