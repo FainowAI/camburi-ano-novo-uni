@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Shield, Check, ArrowRight } from "lucide-react";
 import { PaymentMethodModal } from "./PaymentMethodModal";
+import { PixPaymentModal } from "./PixPaymentModal";
 import { supabase } from "@/integrations/supabase/client";
 
 export const DonationForm = () => {
@@ -18,7 +19,10 @@ export const DonationForm = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activePaymentType, setActivePaymentType] = useState<'onetime' | 'installment' | null>(null);
+  const [showPixModal, setShowPixModal] = useState(false);
   const { toast } = useToast();
+  
+  const PIX_CODE = "00020126440014br.gov.bcb.pix0122unne.cambury@gmail.com27600016BR.COM.PAGSEGURO0136E4BDA145-AEE6-4416-A353-561976EFC0835204000053039865406810.005802BR5919EDSON ROBERTO FORAO6009Sao Paulo62290525PAGS0000810002509201311866304F775";
   
   // Track session for funnel analytics
   const sessionId = useRef(crypto.randomUUID());
@@ -92,7 +96,11 @@ export const DonationForm = () => {
     });
 
     if (activePaymentType === 'onetime') {
-      handleOneTimePayment();
+      if (formData.paymentMethod === 'pix') {
+        setShowPixModal(true);
+      } else {
+        handleOneTimePayment();
+      }
     } else {
       handleInstallmentPayment();
     }
@@ -530,6 +538,14 @@ export const DonationForm = () => {
           </div>
         </div>
       </div>
+
+      {/* PIX Payment Modal */}
+      <PixPaymentModal
+        isOpen={showPixModal}
+        onClose={() => setShowPixModal(false)}
+        pixCode={PIX_CODE}
+        amount={810}
+      />
     </section>
   );
 };
