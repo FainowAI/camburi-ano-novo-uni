@@ -176,7 +176,7 @@ export const DonationForm = () => {
       await trackEvent('payment_method_selected', {
         payment_method: 'parcelado',
         amount: 900,
-        installments: 3,
+        installments: 4,
         currency: 'BRL'
       });
 
@@ -403,11 +403,20 @@ export const DonationForm = () => {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">Parcelado</h3>
                 <div className="mb-4">
-                  <span className="text-4xl font-bold text-blue-400">3x R$300</span>
+                  <span className="text-4xl font-bold text-blue-400">4x R$225</span>
                   <div className="text-gray-400 text-sm mt-1">sem juros</div>
                 </div>
-                <div className="text-gray-500 text-sm">
+                <div className="text-gray-500 text-sm mb-3">
                   Total: <span className="text-gray-400 font-medium">R$900</span>
+                </div>
+                
+                {/* Payment dates */}
+                <div className="text-xs text-gray-500 space-y-1">
+                  <div className="font-medium text-gray-400 mb-1">Datas dos pagamentos:</div>
+                  <div>1ª parcela: 30/09</div>
+                  <div>2ª parcela: 15/10</div>
+                  <div>3ª parcela: 15/11</div>
+                  <div>4ª parcela: 15/12</div>
                 </div>
               </div>
 
