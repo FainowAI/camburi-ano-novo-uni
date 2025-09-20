@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Shield, Check, ArrowRight } from "lucide-react";
+import { PaymentMethodModal } from "./PaymentMethodModal";
+import { supabase } from "@/integrations/supabase/client";
 
 export const DonationForm = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +15,7 @@ export const DonationForm = () => {
     cpf: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const { toast } = useToast();
 
   const formatCPF = (value: string) => {
@@ -22,18 +25,64 @@ export const DonationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.name || !formData.email) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha nome e email.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Abrir modal de seleção de pagamento
+    setShowPaymentModal(true);
+  };
+
+  const handleCardPayment = async () => {
+    setShowPaymentModal(false);
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
-      toast({
-        title: "Obrigado pela sua contribuição!",
-        description: "Sua contribuição de R$900 foi processada com sucesso. Em breve enviaremos os detalhes da festa!",
-      });
+    try {
+      console.log("Initiating Stripe payment with data:", formData);
       
-      setFormData({ name: '', email: '', cpf: '' });
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          cpf: formData.cpf
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log("Payment session created:", data);
+      
+      // Redirecionar para Stripe Checkout
+      if (data.url) {
+        window.open(data.url, '_blank');
+      }
+
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      toast({
+        title: "Erro no pagamento",
+        description: "Não foi possível processar o pagamento. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
+  };
+
+  const handlePixPayment = () => {
+    setShowPaymentModal(false);
+    toast({
+      title: "PIX em desenvolvimento",
+      description: "A opção PIX estará disponível em breve!",
+    });
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -173,6 +222,13 @@ export const DonationForm = () => {
           </div>
         </div>
       </div>
+
+      <PaymentMethodModal
+        open={showPaymentModal}
+        onOpenChange={setShowPaymentModal}
+        onSelectCard={handleCardPayment}
+        onSelectPix={handlePixPayment}
+      />
     </section>
   );
 };
