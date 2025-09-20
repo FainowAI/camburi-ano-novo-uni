@@ -57,21 +57,30 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
-        const response = await fetch(`https://eddduafponbimicjownw.supabase.co/rest/v1/photos?select=*&order=id`, {
-          headers: {
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZGR1YWZwb25iaW1pY2pvd253Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNTc4OTMsImV4cCI6MjA3MzkzMzg5M30.pbXwnw9Gf0k3HI31WkHHByc79JrwmFri0IWDKfsw-K4',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZGR1YWZwb25iaW1pY2pvd253Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNTc4OTMsImV4cCI6MjA3MzkzMzg5M30.pbXwnw9Gf0k3HI31WkHHByc79JrwmFri0IWDKfsw-K4'
-          }
-        });
-        const data = await response.json();
+        console.log('Fetching photos from Supabase...');
+        const { data, error } = await supabase
+          .from('photos')
+          .select('*')
+          .order('id');
         
-        if (data) {
+        console.log('Supabase response:', { data, error });
+        
+        if (error) {
+          console.error('Supabase error:', error);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          console.log('Processing photos:', data);
           const mappedPhotos = data.map((photo: any) => ({
             src: photo.url || '',
             alt: photo.name?.replace('.jpg', '') || '',
             legenda: photoLegendas[photo.name || ''] || photo.name || ''
           }));
+          console.log('Mapped photos:', mappedPhotos);
           setPhotos(mappedPhotos);
+        } else {
+          console.log('No photos found in database');
         }
       } catch (error) {
         console.error('Error fetching photos:', error);
