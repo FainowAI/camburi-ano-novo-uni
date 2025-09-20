@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Shield, Check, ArrowRight } from "lucide-react";
 import { PaymentMethodModal } from "./PaymentMethodModal";
@@ -12,7 +13,8 @@ export const DonationForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    cpf: ''
+    cpf: '',
+    paymentMethod: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activePaymentType, setActivePaymentType] = useState<'onetime' | 'installment' | null>(null);
@@ -357,6 +359,28 @@ export const DonationForm = () => {
                       className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
                     />
                     
+                    <div>
+                      <Label className="text-gray-700 text-sm font-medium mb-2 block">
+                        Método de Pagamento
+                      </Label>
+                      <Select
+                        value={formData.paymentMethod}
+                        onValueChange={(value) => handleInputChange('paymentMethod', value)}
+                      >
+                        <SelectTrigger className="bg-gray-50 border-gray-300 text-gray-900 focus:border-primary">
+                          <SelectValue placeholder="Selecione o método" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white border-gray-300 z-50">
+                          <SelectItem value="cartao" className="hover:bg-gray-100">
+                            Cartão
+                          </SelectItem>
+                          <SelectItem value="pix" className="hover:bg-gray-100">
+                            Pix
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
                     <div className="flex items-center gap-2 text-gray-600 text-xs mb-4">
                       <Shield className="w-3 h-3" />
                       <span>Pagamento 100% seguro</span>
@@ -454,6 +478,28 @@ export const DonationForm = () => {
                       maxLength={14}
                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
                     />
+
+                    <div>
+                      <Label className="text-gray-300 text-sm font-medium mb-2 block">
+                        Método de Pagamento
+                      </Label>
+                      <Select
+                        value={formData.paymentMethod}
+                        onValueChange={(value) => handleInputChange('paymentMethod', value)}
+                      >
+                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white focus:border-primary">
+                          <SelectValue placeholder="Selecione o método" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-700 border-gray-600 z-50">
+                          <SelectItem value="cartao" className="text-white hover:bg-gray-600">
+                            Cartão
+                          </SelectItem>
+                          <SelectItem value="pix" className="text-white hover:bg-gray-600">
+                            Pix
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     
                     <div className="flex items-center gap-2 text-gray-400 text-xs mb-4">
                       <Shield className="w-3 h-3" />
