@@ -4,6 +4,7 @@ import { Instagram, Users, Leaf, Calendar } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import Aurora from "@/components/Aurora";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Photo {
   src: string;
@@ -53,6 +54,7 @@ interface GallerySectionProps {
 export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchPhotos = async () => {
@@ -91,20 +93,44 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
   }, []);
 
   useEffect(() => {
+    // Mobile fallback: set visible immediately on mobile devices
+    if (isMobile) {
+      console.log('Mobile detected, setting gallery visible immediately');
+      setIsVisible(true);
+      return;
+    }
+
+    // Desktop intersection observer with more tolerant settings
     const observer = new IntersectionObserver(
       ([entry]) => {
+        console.log('IntersectionObserver triggered:', entry.isIntersecting, entry.intersectionRatio);
         if (entry.isIntersecting) {
           setIsVisible(true);
         }
       },
-      { threshold: 0.3 }
+      { 
+        threshold: 0.1, // More tolerant threshold
+        rootMargin: '50px' // Trigger earlier
+      }
     );
 
     const element = document.getElementById('gallery-section');
-    if (element) observer.observe(element);
+    if (element) {
+      console.log('Setting up IntersectionObserver for gallery section');
+      observer.observe(element);
+    }
 
-    return () => observer.disconnect();
-  }, []);
+    // Safety timeout: force visibility after 3 seconds if observer hasn't triggered
+    const timeoutId = setTimeout(() => {
+      console.log('Safety timeout triggered, forcing gallery visibility');
+      setIsVisible(true);
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [isMobile]);
 
   return (
     <section id="gallery-section" className="py-20 bg-gradient-section">
@@ -132,21 +158,25 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
             {photos.map((image, index) => (
               <div key={index} className="group">
                 <div className="relative p-4 rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105 overflow-hidden">
-                  <Aurora 
-                    colorStops={['#8b5cf6', '#a855f7', '#9333ea']}
-                    amplitude={0.8}
-                    blend={0.6}
-                    speed={0.5}
-                  />
-                  <GlowingEffect
-                    disabled={false}
-                    proximity={100}
-                    spread={30}
-                    blur={2}
-                    movementDuration={1.5}
-                    borderWidth={2}
-                    variant="white"
-                  />
+                  {!isMobile && (
+                    <>
+                      <Aurora 
+                        colorStops={['#8b5cf6', '#a855f7', '#9333ea']}
+                        amplitude={0.8}
+                        blend={0.6}
+                        speed={0.5}
+                      />
+                      <GlowingEffect
+                        disabled={false}
+                        proximity={100}
+                        spread={30}
+                        blur={2}
+                        movementDuration={1.5}
+                        borderWidth={2}
+                        variant="white"
+                      />
+                    </>
+                  )}
                   <div className="relative z-10 overflow-hidden rounded-lg">
                     <img
                       src={image.src}
