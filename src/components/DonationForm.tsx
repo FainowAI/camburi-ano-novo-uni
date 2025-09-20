@@ -478,28 +478,6 @@ export const DonationForm = () => {
                       maxLength={14}
                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
                     />
-
-                    <div>
-                      <Label className="text-gray-300 text-sm font-medium mb-2 block">
-                        Método de Pagamento
-                      </Label>
-                      <Select
-                        value={formData.paymentMethod}
-                        onValueChange={(value) => handleInputChange('paymentMethod', value)}
-                      >
-                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white focus:border-primary">
-                          <SelectValue placeholder="Selecione o método" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-700 border-gray-600 z-50">
-                          <SelectItem value="cartao" className="text-white hover:bg-gray-600">
-                            Cartão
-                          </SelectItem>
-                          <SelectItem value="pix" className="text-white hover:bg-gray-600">
-                            Pix
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
                     
                     <div className="flex items-center gap-2 text-gray-400 text-xs mb-4">
                       <Shield className="w-3 h-3" />
