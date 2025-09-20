@@ -47,7 +47,7 @@ export const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
             <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full">
               <Users className="w-4 h-4 text-primary" />
               <span className="text-sm font-montserrat font-semibold text-primary">
-                127 pessoas já se comprometeram!
+                15 pessoas já se comprometeram!
               </span>
             </div>
             <div className="bg-gradient-to-r from-accent to-accent/80 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
