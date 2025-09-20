@@ -330,59 +330,61 @@ export const DonationForm = () => {
 
               {/* Form or Button */}
               {activePaymentType === 'onetime' ? (
-                <form onSubmit={handleFormSubmit} className="space-y-4">
-                  <Input
-                    type="text"
-                    placeholder="Digite seu nome completo"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    required
-                    className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Digite seu email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    required
-                    className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
-                  />
-                  <Input
-                    type="text"
-                    placeholder="CPF (opcional)"
-                    value={formData.cpf}
-                    onChange={(e) => handleInputChange('cpf', e.target.value)}
-                    maxLength={14}
-                    className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
-                  />
-                  
-                  <div className="flex items-center gap-2 text-gray-600 text-xs mb-4">
-                    <Shield className="w-3 h-3" />
-                    <span>Pagamento 100% seguro</span>
-                  </div>
+                <div className="animate-fade-in animate-scale-in">
+                  <form onSubmit={handleFormSubmit} className="space-y-4">
+                    <Input
+                      type="text"
+                      placeholder="Digite seu nome completo"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      required
+                      className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
+                    />
+                    <Input
+                      type="email"
+                      placeholder="Digite seu email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      required
+                      className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="CPF (opcional)"
+                      value={formData.cpf}
+                      onChange={(e) => handleInputChange('cpf', e.target.value)}
+                      maxLength={14}
+                      className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
+                    />
+                    
+                    <div className="flex items-center gap-2 text-gray-600 text-xs mb-4">
+                      <Shield className="w-3 h-3" />
+                      <span>Pagamento 100% seguro</span>
+                    </div>
 
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all"
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Processando...
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2">
-                        <span>Prosseguir para pagamento</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </div>
-                    )}
-                  </Button>
-                </form>
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all hover-scale"
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Processando...
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2">
+                          <span>Prosseguir para pagamento</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      )}
+                    </Button>
+                  </form>
+                </div>
               ) : (
                 <Button
                   onClick={() => handlePaymentTypeSelect('onetime')}
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all"
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all hover-scale"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span>Contribuir agora</span>
@@ -424,59 +426,61 @@ export const DonationForm = () => {
 
               {/* Form or Button */}
               {activePaymentType === 'installment' ? (
-                <form onSubmit={handleFormSubmit} className="space-y-4">
-                  <Input
-                    type="text"
-                    placeholder="Digite seu nome completo"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    required
-                    className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
-                  />
-                  <Input
-                    type="email"
-                    placeholder="Digite seu email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                    required
-                    className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
-                  />
-                  <Input
-                    type="text"
-                    placeholder="CPF (opcional)"
-                    value={formData.cpf}
-                    onChange={(e) => handleInputChange('cpf', e.target.value)}
-                    maxLength={14}
-                    className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
-                  />
-                  
-                  <div className="flex items-center gap-2 text-gray-400 text-xs mb-4">
-                    <Shield className="w-3 h-3" />
-                    <span>Pagamento 100% seguro</span>
-                  </div>
+                <div className="animate-fade-in animate-scale-in">
+                  <form onSubmit={handleFormSubmit} className="space-y-4">
+                    <Input
+                      type="text"
+                      placeholder="Digite seu nome completo"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      required
+                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
+                    />
+                    <Input
+                      type="email"
+                      placeholder="Digite seu email"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      required
+                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="CPF (opcional)"
+                      value={formData.cpf}
+                      onChange={(e) => handleInputChange('cpf', e.target.value)}
+                      maxLength={14}
+                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
+                    />
+                    
+                    <div className="flex items-center gap-2 text-gray-400 text-xs mb-4">
+                      <Shield className="w-3 h-3" />
+                      <span>Pagamento 100% seguro</span>
+                    </div>
 
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all"
-                  >
-                    {isSubmitting ? (
-                      <div className="flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Processando...
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center gap-2">
-                        <span>Prosseguir para pagamento</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </div>
-                    )}
-                  </Button>
-                </form>
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all hover-scale"
+                    >
+                      {isSubmitting ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Processando...
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2">
+                          <span>Prosseguir para pagamento</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+                      )}
+                    </Button>
+                  </form>
+                </div>
               ) : (
                 <Button
                   onClick={() => handlePaymentTypeSelect('installment')}
-                  className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl transition-all"
+                  className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 rounded-xl transition-all hover-scale"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span>Contribuir agora</span>
