@@ -29,9 +29,13 @@ serve(async (req) => {
       : "price_1S9QIuAmzfZZxsYV3Xc12rKG"; // À vista: R$900
     const mode = isInstallment ? "subscription" : "payment";
 
+    // Generate a unique session ID for tracking
+    const trackingSessionId = crypto.randomUUID();
+
     // Base session configuration
     const sessionConfig = {
       customer_email: email,
+      client_reference_id: trackingSessionId, // For webhook tracking
       line_items: [
         {
           price: priceId,
@@ -39,13 +43,14 @@ serve(async (req) => {
         },
       ],
       mode: mode,
-      success_url: `${req.headers.get("origin") || "http://localhost:8080"}/?payment=success&mode=${payment_mode}`,
-      cancel_url: `${req.headers.get("origin") || "http://localhost:8080"}/?payment=cancelled`,
+      success_url: `${req.headers.get("origin") || "http://localhost:8080"}/?payment=success&mode=${payment_mode}&session=${trackingSessionId}`,
+      cancel_url: `${req.headers.get("origin") || "http://localhost:8080"}/?payment=cancelled&session=${trackingSessionId}`,
       automatic_tax: { enabled: false },
       metadata: {
         customer_name: name,
         customer_cpf: cpf || "",
         payment_mode: payment_mode || "one_time",
+        tracking_session_id: trackingSessionId,
       },
       // Configurações para pagamento no Brasil
       locale: "pt-BR",
