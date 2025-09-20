@@ -26,7 +26,7 @@ serve(async (req) => {
     const isInstallment = payment_mode === "installment";
     const priceId = isInstallment 
       ? "price_1S9QRcAmzfZZxsYVIjc7a0pi" // Parcelado: 3x R$300
-      : "price_1S9QIuAmzfZZxsYV3Xc12rKG"; // À vista: R$900
+      : "price_1S9RWUAmzfZZxsYVzjj9bips"; // À vista: R$810
     const mode = isInstallment ? "subscription" : "payment";
 
     // Generate a unique session ID for tracking
