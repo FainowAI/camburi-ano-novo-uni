@@ -25,7 +25,7 @@ serve(async (req) => {
     // Define price IDs and session configuration based on payment mode
     const isInstallment = payment_mode === "installment";
     const priceId = isInstallment 
-      ? "price_1S9RfTAmzfZZxsYVfXNo1eWt" // Parcelado: 4x R$225
+      ? "price_1S9T1AAmzfZZxsYVumSIPHlh" // Parcelado: 4x R$236.25
       : "price_1S9RWUAmzfZZxsYVzjj9bips"; // À vista: R$810
     const mode = isInstallment ? "subscription" : "payment";
 
@@ -63,7 +63,7 @@ serve(async (req) => {
       sessionConfig.subscription_data = {
         metadata: {
           installment_plan: "4_months",
-          total_amount: "90000", // R$900 em centavos
+          total_amount: "94500", // R$945 em centavos
           customer_name: name,
           customer_cpf: cpf || "",
         },

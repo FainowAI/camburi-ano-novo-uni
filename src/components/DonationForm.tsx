@@ -52,10 +52,10 @@ export const DonationForm = () => {
     setActivePaymentType(paymentType);
     
     // Track payment type selection
-    await trackEvent('payment_type_selected', {
-      payment_type: paymentType,
-      amount: paymentType === 'onetime' ? 810 : 900
-    });
+      await trackEvent('payment_type_selected', {
+        payment_type: paymentType,
+        amount: paymentType === 'onetime' ? 810 : 945
+      });
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -175,7 +175,7 @@ export const DonationForm = () => {
       // Track payment method selection
       await trackEvent('payment_method_selected', {
         payment_method: 'parcelado',
-        amount: 900,
+        amount: 945,
         installments: 4,
         currency: 'BRL'
       });
@@ -403,11 +403,13 @@ export const DonationForm = () => {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-2">Parcelado</h3>
                 <div className="mb-4">
-                  <span className="text-4xl font-bold text-blue-400">4x R$225</span>
+                  <div className="text-4xl font-bold text-blue-400">
+                    4x R$225 <span className="text-lg text-gray-400">+ 5% de taxa</span>
+                  </div>
                   <div className="text-gray-400 text-sm mt-1">sem juros</div>
                 </div>
                 <div className="text-gray-500 text-sm">
-                  Total: <span className="text-gray-400 font-medium">R$900</span>
+                  Total: <span className="text-gray-400 font-medium">R$945</span>
                 </div>
               </div>
 
