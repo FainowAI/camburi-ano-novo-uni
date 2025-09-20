@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,31 @@ export const DonationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const { toast } = useToast();
+  
+  // Track session for funnel analytics
+  const sessionId = useRef(crypto.randomUUID());
+
+  // Helper function to track events
+  const trackEvent = async (eventType: string, additionalData = {}) => {
+    try {
+      await supabase.functions.invoke('track-checkout-event', {
+        body: {
+          session_id: sessionId.current,
+          event_type: eventType,
+          user_name: formData.name || null,
+          user_email: formData.email || null,
+          user_cpf: formData.cpf || null,
+          metadata: {
+            timestamp: new Date().toISOString(),
+            ...additionalData
+          }
+        }
+      });
+      console.log(`[ANALYTICS] Event tracked: ${eventType}`, additionalData);
+    } catch (error) {
+      console.error("Error tracking event:", error);
+    }
+  };
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
@@ -35,8 +60,18 @@ export const DonationForm = () => {
       return;
     }
 
+    // Track form submission
+    await trackEvent('form_submitted', {
+      has_cpf: !!formData.cpf,
+      name_length: formData.name.length,
+      email_domain: formData.email.split('@')[1] || 'unknown'
+    });
+
     // Abrir modal de seleção de pagamento
     setShowPaymentModal(true);
+    
+    // Track modal opening
+    await trackEvent('payment_modal_opened');
   };
 
   const handleOneTimePayment = async () => {
@@ -44,9 +79,16 @@ export const DonationForm = () => {
     setIsSubmitting(true);
 
     try {
+      // Track payment method selection
+      await trackEvent('payment_method_selected', {
+        payment_method: 'à vista',
+        amount: 900,
+        currency: 'BRL'
+      });
+
       console.log("Logging payment selection and initiating one-time Stripe payment with data:", formData);
       
-      // Log payment selection
+      // Log payment selection (keep for compatibility)
       const { error: logError } = await supabase.functions.invoke('log-payment', {
         body: {
           name: formData.name,
@@ -59,6 +101,12 @@ export const DonationForm = () => {
       if (logError) {
         console.error("Error logging payment:", logError);
       }
+
+      // Track checkout initiation
+      await trackEvent('checkout_started', {
+        payment_method: 'à vista',
+        checkout_type: 'one_time'
+      });
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -70,18 +118,36 @@ export const DonationForm = () => {
       });
 
       if (error) {
+        await trackEvent('checkout_error', {
+          error: error.message,
+          payment_method: 'à vista'
+        });
         throw error;
       }
 
       console.log("Payment session created:", data);
       
+      // Track successful checkout session creation
+      await trackEvent('checkout_session_created', {
+        payment_method: 'à vista',
+        checkout_session_id: data.url ? 'generated' : 'failed'
+      });
+      
       // Redirecionar para Stripe Checkout
       if (data.url) {
+        // Track redirect to Stripe
+        await trackEvent('redirected_to_stripe', {
+          payment_method: 'à vista'
+        });
         window.open(data.url, '_blank');
       }
 
     } catch (error) {
       console.error("Error creating one-time payment:", error);
+      await trackEvent('payment_error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        payment_method: 'à vista'
+      });
       toast({
         title: "Erro no pagamento",
         description: "Não foi possível processar o pagamento. Tente novamente.",
@@ -97,9 +163,17 @@ export const DonationForm = () => {
     setIsSubmitting(true);
 
     try {
+      // Track payment method selection
+      await trackEvent('payment_method_selected', {
+        payment_method: 'parcelado',
+        amount: 900,
+        installments: 3,
+        currency: 'BRL'
+      });
+
       console.log("Logging payment selection and initiating installment Stripe payment with data:", formData);
       
-      // Log payment selection
+      // Log payment selection (keep for compatibility)
       const { error: logError } = await supabase.functions.invoke('log-payment', {
         body: {
           name: formData.name,
@@ -112,6 +186,12 @@ export const DonationForm = () => {
       if (logError) {
         console.error("Error logging payment:", logError);
       }
+
+      // Track checkout initiation
+      await trackEvent('checkout_started', {
+        payment_method: 'parcelado',
+        checkout_type: 'installment'
+      });
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -123,18 +203,36 @@ export const DonationForm = () => {
       });
 
       if (error) {
+        await trackEvent('checkout_error', {
+          error: error.message,
+          payment_method: 'parcelado'
+        });
         throw error;
       }
 
       console.log("Installment payment session created:", data);
       
+      // Track successful checkout session creation
+      await trackEvent('checkout_session_created', {
+        payment_method: 'parcelado',
+        checkout_session_id: data.url ? 'generated' : 'failed'
+      });
+      
       // Redirecionar para Stripe Checkout
       if (data.url) {
+        // Track redirect to Stripe
+        await trackEvent('redirected_to_stripe', {
+          payment_method: 'parcelado'
+        });
         window.open(data.url, '_blank');
       }
 
     } catch (error) {
       console.error("Error creating installment payment:", error);
+      await trackEvent('payment_error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        payment_method: 'parcelado'
+      });
       toast({
         title: "Erro no pagamento parcelado",
         description: "Não foi possível processar o pagamento parcelado. Tente novamente.",
@@ -149,9 +247,16 @@ export const DonationForm = () => {
     setShowPaymentModal(false);
     
     try {
+      // Track payment method selection
+      await trackEvent('payment_method_selected', {
+        payment_method: 'PIX',
+        amount: 900,
+        currency: 'BRL'
+      });
+
       console.log("Logging PIX payment selection:", formData);
       
-      // Log payment selection
+      // Log payment selection (keep for compatibility)
       const { error: logError } = await supabase.functions.invoke('log-payment', {
         body: {
           name: formData.name,
@@ -164,14 +269,29 @@ export const DonationForm = () => {
       if (logError) {
         console.error("Error logging payment:", logError);
       }
+
+      // Track PIX selection (not implemented yet)
+      await trackEvent('pix_selected_not_implemented', {
+        payment_method: 'PIX'
+      });
+
     } catch (error) {
       console.error("Error logging PIX payment:", error);
+      await trackEvent('pix_error', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
     
     toast({
       title: "PIX em desenvolvimento",
       description: "A opção PIX estará disponível em breve!",
     });
+  };
+
+  const handleModalClose = async () => {
+    setShowPaymentModal(false);
+    // Track modal abandonment
+    await trackEvent('payment_modal_abandoned');
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -321,7 +441,7 @@ export const DonationForm = () => {
 
       <PaymentMethodModal
         open={showPaymentModal}
-        onOpenChange={setShowPaymentModal}
+        onOpenChange={handleModalClose}
         onSelectOneTime={handleOneTimePayment}
         onSelectInstallment={handleInstallmentPayment}
         onSelectPix={handlePixPayment}

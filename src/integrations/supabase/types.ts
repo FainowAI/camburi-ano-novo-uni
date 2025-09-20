@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      checkout_events: {
+        Row: {
+          checkout_session_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          payment_method: string | null
+          session_id: string
+          user_cpf: string | null
+          user_email: string | null
+          user_name: string | null
+        }
+        Insert: {
+          checkout_session_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          session_id?: string
+          user_cpf?: string | null
+          user_email?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          checkout_session_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          session_id?: string
+          user_cpf?: string | null
+          user_email?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
       payment_logs: {
         Row: {
           aceitou: boolean
