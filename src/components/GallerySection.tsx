@@ -3,15 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Instagram, Users, Leaf, Calendar } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import Aurora from "@/components/Aurora";
-import festa1 from "@/assets/festa-1.jpg";
-import festa2 from "@/assets/festa-2.jpg";
-import festa3 from "@/assets/festa-3.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
-const images = [
-  { src: festa1, alt: "Carnaval2025", legenda: "Carnaval 2025" },
-  { src: festa2, alt: "Carnaval2024", legenda: "Carnaval 2024" },
-  { src: festa3, alt: "Festa2024", legenda: "Final de ano 2024" },
-];
+interface Photo {
+  src: string;
+  alt: string;
+  legenda: string;
+}
+
+const photoLegendas: Record<string, string> = {
+  "festa-1.jpg": "Carnaval 2025",
+  "festa-2.jpg": "Carnaval 2024", 
+  "festa-3.jpg": "Final de ano 2024",
+};
 
 const depoimentos = [
   {
@@ -48,6 +52,34 @@ interface GallerySectionProps {
 
 export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [photos, setPhotos] = useState<Photo[]>([]);
+
+  useEffect(() => {
+    const fetchPhotos = async () => {
+      try {
+        const response = await fetch(`https://eddduafponbimicjownw.supabase.co/rest/v1/photos?order=id`, {
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZGR1YWZwb25iaW1pY2pvd253Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNTc4OTMsImV4cCI6MjA3MzkzMzg5M30.pbXwnw9Gf0k3HI31WkHHByc79JrwmFri0IWDKfsw-K4',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVkZGR1YWZwb25iaW1pY2pvd253Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgzNTc4OTMsImV4cCI6MjA3MzkzMzg5M30.pbXwnw9Gf0k3HI31WkHHByc79JrwmFri0IWDKfsw-K4'
+          }
+        });
+        const data = await response.json();
+        
+        if (data) {
+          const mappedPhotos = data.map((photo: any) => ({
+            src: photo.url || '',
+            alt: photo.name?.replace('.jpg', '') || '',
+            legenda: photoLegendas[photo.name || ''] || photo.name || ''
+          }));
+          setPhotos(mappedPhotos);
+        }
+      } catch (error) {
+        console.error('Error fetching photos:', error);
+      }
+    };
+
+    fetchPhotos();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -88,7 +120,7 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {images.map((image, index) => (
+            {photos.map((image, index) => (
               <div key={index} className="group">
                 <div className="relative p-4 rounded-lg shadow-card hover:shadow-primary/20 transition-all duration-300 group-hover:scale-105 overflow-hidden">
                   <Aurora 
