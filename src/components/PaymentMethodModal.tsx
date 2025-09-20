@@ -30,13 +30,14 @@ export const PaymentMethodModal = ({
           {/* À Vista */}
           <Button
             onClick={onSelectOneTime}
-            className="flex flex-col items-center gap-3 h-32 bg-white hover:bg-gray-100 text-gray-900 font-semibold p-4 rounded-xl transition-all duration-200 hover:scale-105"
+            variant="outline"
+            className="flex flex-col items-center gap-3 h-32 border-2 border-green-500 text-white hover:bg-green-500/10 font-semibold p-4 rounded-xl transition-all duration-200 hover:scale-105"
           >
-            <CreditCard className="w-8 h-8 text-green-600" />
+            <CreditCard className="w-8 h-8 text-green-400" />
             <div className="text-center">
-              <div className="text-lg font-bold">À vista</div>
-              <div className="text-2xl font-bold text-green-600">R$ 900,00</div>
-              <div className="text-sm font-normal text-gray-600">Pagamento único</div>
+              <div className="text-lg font-bold text-green-400">À vista</div>
+              <div className="text-2xl font-bold text-green-400">R$ 900,00</div>
+              <div className="text-sm font-normal text-gray-400">Pagamento único</div>
             </div>
           </Button>
           
