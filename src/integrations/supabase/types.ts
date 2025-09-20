@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      payment_logs: {
+        Row: {
+          aceitou: boolean
+          cpf: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string
+          payment_method: string
+        }
+        Insert: {
+          aceitou?: boolean
+          cpf?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          payment_method: string
+        }
+        Update: {
+          aceitou?: boolean
+          cpf?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          payment_method?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

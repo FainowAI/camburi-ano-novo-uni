@@ -44,7 +44,21 @@ export const DonationForm = () => {
     setIsSubmitting(true);
 
     try {
-      console.log("Initiating one-time Stripe payment with data:", formData);
+      console.log("Logging payment selection and initiating one-time Stripe payment with data:", formData);
+      
+      // Log payment selection
+      const { error: logError } = await supabase.functions.invoke('log-payment', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          cpf: formData.cpf,
+          payment_method: "à vista"
+        }
+      });
+
+      if (logError) {
+        console.error("Error logging payment:", logError);
+      }
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -83,7 +97,21 @@ export const DonationForm = () => {
     setIsSubmitting(true);
 
     try {
-      console.log("Initiating installment Stripe payment with data:", formData);
+      console.log("Logging payment selection and initiating installment Stripe payment with data:", formData);
+      
+      // Log payment selection
+      const { error: logError } = await supabase.functions.invoke('log-payment', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          cpf: formData.cpf,
+          payment_method: "parcelado"
+        }
+      });
+
+      if (logError) {
+        console.error("Error logging payment:", logError);
+      }
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -117,8 +145,29 @@ export const DonationForm = () => {
     }
   };
 
-  const handlePixPayment = () => {
+  const handlePixPayment = async () => {
     setShowPaymentModal(false);
+    
+    try {
+      console.log("Logging PIX payment selection:", formData);
+      
+      // Log payment selection
+      const { error: logError } = await supabase.functions.invoke('log-payment', {
+        body: {
+          name: formData.name,
+          email: formData.email,
+          cpf: formData.cpf,
+          payment_method: "PIX"
+        }
+      });
+
+      if (logError) {
+        console.error("Error logging payment:", logError);
+      }
+    } catch (error) {
+      console.error("Error logging PIX payment:", error);
+    }
+    
     toast({
       title: "PIX em desenvolvimento",
       description: "A opção PIX estará disponível em breve!",

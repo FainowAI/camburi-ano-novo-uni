@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.check-subscription-status]
 verify_jwt = false
+
+[functions.log-payment]
+verify_jwt = false
