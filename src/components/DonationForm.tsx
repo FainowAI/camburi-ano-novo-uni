@@ -72,12 +72,23 @@ export const DonationForm = () => {
       return;
     }
 
+    // Para pagamento à vista, verificar se método de pagamento foi selecionado
+    if (activePaymentType === 'onetime' && !formData.paymentMethod) {
+      toast({
+        title: "Método de pagamento obrigatório",
+        description: "Por favor, selecione o método de pagamento.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Track form submission
     await trackEvent('form_submitted', {
       has_cpf: !!formData.cpf,
       name_length: formData.name.length,
       email_domain: formData.email.split('@')[1] || 'unknown',
-      payment_type: activePaymentType
+      payment_type: activePaymentType,
+      payment_method: formData.paymentMethod || 'card'
     });
 
     if (activePaymentType === 'onetime') {
@@ -93,7 +104,7 @@ export const DonationForm = () => {
     try {
       // Track payment method selection
       await trackEvent('payment_method_selected', {
-        payment_method: 'à vista',
+        payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão',
         amount: 810,
         currency: 'BRL'
       });
@@ -116,7 +127,7 @@ export const DonationForm = () => {
 
       // Track checkout initiation
       await trackEvent('checkout_started', {
-        payment_method: 'à vista',
+        payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão',
         checkout_type: 'one_time'
       });
       
@@ -125,14 +136,15 @@ export const DonationForm = () => {
           name: formData.name,
           email: formData.email,
           cpf: formData.cpf,
-          payment_mode: "one_time"
+          payment_mode: "one_time",
+          payment_method: formData.paymentMethod || 'cartao'
         }
       });
 
       if (error) {
         await trackEvent('checkout_error', {
           error: error.message,
-          payment_method: 'à vista'
+          payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão'
         });
         throw error;
       }
@@ -141,7 +153,7 @@ export const DonationForm = () => {
       
       // Track successful checkout session creation
       await trackEvent('checkout_session_created', {
-        payment_method: 'à vista',
+        payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão',
         checkout_session_id: data.url ? 'generated' : 'failed'
       });
       
@@ -149,7 +161,7 @@ export const DonationForm = () => {
       if (data.url) {
         // Track redirect to Stripe
         await trackEvent('redirected_to_stripe', {
-          payment_method: 'à vista'
+          payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão'
         });
         window.open(data.url, '_blank');
       }
@@ -158,10 +170,10 @@ export const DonationForm = () => {
       console.error("Error creating one-time payment:", error);
       await trackEvent('payment_error', {
         error: error instanceof Error ? error.message : 'Unknown error',
-        payment_method: 'à vista'
+        payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão'
       });
       toast({
-        title: "Erro no pagamento",
+        title: `Erro no pagamento${formData.paymentMethod === 'pix' ? ' via PIX' : ''}`,
         description: "Não foi possível processar o pagamento. Tente novamente.",
         variant: "destructive"
       });

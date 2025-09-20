@@ -13,9 +13,9 @@ serve(async (req) => {
   }
 
   try {
-    const { name, email, cpf, payment_mode } = await req.json();
+    const { name, email, cpf, payment_mode, payment_method } = await req.json();
 
-    console.log("Creating payment session for:", { name, email, cpf, payment_mode });
+    console.log("Creating payment session for:", { name, email, cpf, payment_mode, payment_method });
 
     // Initialize Stripe
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -28,6 +28,12 @@ serve(async (req) => {
       ? "price_1S9T1AAmzfZZxsYVumSIPHlh" // Parcelado: 4x R$236.25
       : "price_1S9RWUAmzfZZxsYVzjj9bips"; // À vista: R$810
     const mode = isInstallment ? "subscription" : "payment";
+
+    // Configure payment method types based on user selection
+    let paymentMethodTypes = ["card"]; // Default to card
+    if (payment_method === "pix") {
+      paymentMethodTypes = ["pix"];
+    }
 
     // Generate a unique session ID for tracking
     const trackingSessionId = crypto.randomUUID();
@@ -50,13 +56,23 @@ serve(async (req) => {
         customer_name: name,
         customer_cpf: cpf || "",
         payment_mode: payment_mode || "one_time",
+        payment_method: payment_method || "cartao",
         tracking_session_id: trackingSessionId,
       },
       // Configurações para pagamento no Brasil
       locale: "pt-BR",
-      payment_method_types: ["card"],
+      payment_method_types: paymentMethodTypes,
       billing_address_collection: "required",
     };
+
+    // Add PIX-specific configuration
+    if (payment_method === "pix") {
+      sessionConfig.payment_method_options = {
+        pix: {
+          expires_after_seconds: 86400, // 24 hours expiration for PIX
+        },
+      };
+    }
 
     // Add subscription-specific configuration for installment payments
     if (isInstallment) {
