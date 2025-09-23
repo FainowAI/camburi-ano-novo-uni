@@ -23,7 +23,7 @@ export type Database = {
           metadata: Json | null
           payment_method: string | null
           session_id: string
-          user_cpf: string | null
+          use_number: string | null
           user_email: string | null
           user_name: string | null
         }
@@ -35,7 +35,7 @@ export type Database = {
           metadata?: Json | null
           payment_method?: string | null
           session_id?: string
-          user_cpf?: string | null
+          use_number?: string | null
           user_email?: string | null
           user_name?: string | null
         }
@@ -47,7 +47,7 @@ export type Database = {
           metadata?: Json | null
           payment_method?: string | null
           session_id?: string
-          user_cpf?: string | null
+          use_number?: string | null
           user_email?: string | null
           user_name?: string | null
         }
@@ -56,30 +56,33 @@ export type Database = {
       payment_logs: {
         Row: {
           aceitou: boolean
-          cpf: string | null
           created_at: string
           email: string
           id: string
           name: string
+          pagou_pix: Json | null
           payment_method: string
+          telefone: string | null
         }
         Insert: {
           aceitou?: boolean
-          cpf?: string | null
           created_at?: string
           email: string
           id?: string
           name: string
+          pagou_pix?: Json | null
           payment_method: string
+          telefone?: string | null
         }
         Update: {
           aceitou?: boolean
-          cpf?: string | null
           created_at?: string
           email?: string
           id?: string
           name?: string
+          pagou_pix?: Json | null
           payment_method?: string
+          telefone?: string | null
         }
         Relationships: []
       }
@@ -104,15 +107,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -239,6 +269,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

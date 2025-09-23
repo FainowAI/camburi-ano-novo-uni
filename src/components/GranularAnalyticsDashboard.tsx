@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { RefreshCcw, MousePointer, Clock, Eye, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import AdminHeader from "@/components/AdminHeader";
 
 interface EventData {
   id: string;
@@ -62,14 +63,16 @@ const GranularAnalyticsDashboard = () => {
     .reduce((acc, e) => acc + (e.metadata.time_since_load / 1000), 0) / events.length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Analytics Granular</h2>
-        <Button onClick={fetchEvents} disabled={loading}>
-          <RefreshCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Atualizar
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+      <AdminHeader />
+      <div className="container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Analytics Granular</h2>
+          <Button onClick={fetchEvents} disabled={loading}>
+            <RefreshCcw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+        </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -201,6 +204,7 @@ const GranularAnalyticsDashboard = () => {
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
     </div>
   );
 };
