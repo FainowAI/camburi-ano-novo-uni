@@ -146,7 +146,6 @@ const ParaisoCamburyAnalytics = () => {
 
       // Calculate detailed funnel metrics
       const uniqueSessions = new Set(events.map(e => e.session_id)).size;
-      const formFieldsCompleted = events.filter(e => e.event_type === 'form_field_completed').length;
       const formSubmitted = events.filter(e => e.event_type === 'form_submitted').length;
       const pixModalOpened = events.filter(e => e.event_type === 'pix_modal_opened').length;
       const pixPaymentConfirmed = events.filter(e => e.event_type === 'pix_payment_confirmed').length;
@@ -158,7 +157,7 @@ const ParaisoCamburyAnalytics = () => {
 
       setFunnelMetrics({
         total_sessions: uniqueSessions,
-        form_fields_completed: formFieldsCompleted,
+        form_fields_completed: 0, // Removido evento form_field_completed
         form_submitted: formSubmitted,
         pix_modal_opened: pixModalOpened,
         pix_payment_confirmed: pixPaymentConfirmed,
@@ -167,13 +166,14 @@ const ParaisoCamburyAnalytics = () => {
         abandonment_rate: abandonmentRate,
       });
 
-      // Calculate event type metrics
-      const eventTypeCounts = events.reduce((acc, event) => {
+      // Calculate event type metrics (filter out form_field_completed)
+      const filteredEvents = events.filter(e => e.event_type !== 'form_field_completed');
+      const eventTypeCounts = filteredEvents.reduce((acc, event) => {
         acc[event.event_type] = (acc[event.event_type] || 0) + 1;
         return acc;
       }, {} as Record<string, number>);
 
-      const totalEvents = events.length;
+      const totalEvents = filteredEvents.length;
       const eventMetrics = Object.entries(eventTypeCounts)
         .map(([event_type, count]) => ({
           event_type,
@@ -306,7 +306,6 @@ const ParaisoCamburyAnalytics = () => {
             <div className="space-y-4">
               {[
                 { name: 'Sessões Únicas', value: funnelMetrics.total_sessions, percentage: 100 },
-                { name: 'Campos Preenchidos', value: funnelMetrics.form_fields_completed, percentage: (funnelMetrics.form_fields_completed / Math.max(funnelMetrics.total_sessions, 1)) * 100 },
                 { name: 'Formulário Enviado', value: funnelMetrics.form_submitted, percentage: (funnelMetrics.form_submitted / Math.max(funnelMetrics.total_sessions, 1)) * 100 },
                 { name: 'Modal PIX Aberto', value: funnelMetrics.pix_modal_opened, percentage: (funnelMetrics.pix_modal_opened / Math.max(funnelMetrics.total_sessions, 1)) * 100 },
                 { name: 'PIX Confirmado', value: funnelMetrics.pix_payment_confirmed, percentage: (funnelMetrics.pix_payment_confirmed / Math.max(funnelMetrics.total_sessions, 1)) * 100 },
@@ -319,7 +318,7 @@ const ParaisoCamburyAnalytics = () => {
                   <div className="w-20 text-sm text-right">
                     {step.value} ({isNaN(step.percentage) ? 0 : step.percentage.toFixed(1)}%)
                   </div>
-                  {index < 4 && (
+                  {index < 3 && (
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   )}
                 </div>
@@ -599,12 +598,12 @@ const ParaisoCamburyAnalytics = () => {
                       <h4 className="font-medium mb-2">Interações do Formulário</h4>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="flex justify-between">
-                          <span>Campos Preenchidos:</span>
-                          <span>{checkoutEvents.filter(e => e.event_type === 'form_field_completed').length}</span>
-                        </div>
-                        <div className="flex justify-between">
                           <span>Formulários Enviados:</span>
                           <span>{checkoutEvents.filter(e => e.event_type === 'form_submitted').length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Validações de Erro:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'form_validation_error').length}</span>
                         </div>
                       </div>
                     </div>

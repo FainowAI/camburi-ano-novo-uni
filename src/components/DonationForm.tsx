@@ -267,8 +267,8 @@ export const DonationForm = () => {
       [field]: value
     }));
 
-    // Track field completion with granular analytics
-    analytics.trackFormFieldBlur(field, value);
+    // Removido tracking individual de campos para reduzir requests
+    // analytics.trackFormFieldBlur(field, value);
   };
 
   const benefits = [

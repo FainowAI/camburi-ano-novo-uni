@@ -69,15 +69,17 @@ export const useGranularAnalytics = () => {
   }, [trackEvent]);
 
   const trackFormFieldBlur = useCallback((fieldName: string, value: string) => {
-    const interactionTime = formInteractionStartTime.current 
-      ? Date.now() - formInteractionStartTime.current 
-      : 0;
-    
-    trackEvent('form_field_completed', {
-      form_field: fieldName,
-      field_value: value ? 'filled' : 'empty',
-      interaction_type: 'blur',
-      field_fill_time: interactionTime
+    // Removido o tracking individual de campos para reduzir requests
+    // Agora só trackamos quando o formulário é submetido
+    console.log(`Field ${fieldName} completed with value: ${value ? 'filled' : 'empty'}`);
+  }, []);
+
+  const trackFormCompletion = useCallback((formData: any) => {
+    trackEvent('form_all_fields_completed', {
+      total_fields: Object.keys(formData).length,
+      filled_fields: Object.values(formData).filter(v => v).length,
+      completion_percentage: (Object.values(formData).filter(v => v).length / Object.keys(formData).length) * 100,
+      fields_data: formData
     });
   }, [trackEvent]);
 
@@ -171,6 +173,7 @@ export const useGranularAnalytics = () => {
     trackEvent,
     trackFormFieldFocus,
     trackFormFieldBlur,
+    trackFormCompletion, // Nova função para tracking de formulário completo
     trackFormValidationError,
     trackButtonClick,
     trackElementHover,
