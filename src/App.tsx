@@ -10,6 +10,7 @@ import Analytics from "./pages/Analytics";
 import Auth from "./pages/Auth";
 import ParaisoCamburyAnalytics from "./pages/ParaisoCamburyAnalytics";
 import GranularAnalyticsDashboard from "./components/GranularAnalyticsDashboard";
+import MFASetupPage from "./pages/MFASetupPage";
 import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,11 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/mfa-setup" element={
+              <AdminRoute>
+                <MFASetupPage />
+              </AdminRoute>
+            } />
             <Route path="/analytics/paraiso-cambury" element={
               <AdminRoute>
                 <ParaisoCamburyAnalytics />

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, Shield, BarChart3 } from 'lucide-react';
+import { LogOut, Shield, BarChart3, Smartphone } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const AdminHeader = () => {
@@ -35,6 +35,16 @@ const AdminHeader = () => {
               <Link to="/analytics/granular">
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Granular
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant={location.pathname === '/mfa-setup' ? 'default' : 'ghost'}
+              size="sm"
+            >
+              <Link to="/mfa-setup">
+                <Smartphone className="w-4 h-4 mr-2" />
+                2FA
               </Link>
             </Button>
           </nav>
