@@ -18,16 +18,6 @@ const photoLegendas: Record<string, string> = {
   "festa-3.jpg": "Final de ano 2024",
 };
 
-const depoimentos = [
-  {
-    texto: "Esses encontros fazem parte da nossa história.",
-    autor: "Ana, participante desde 2018"
-  },
-  {
-    texto: "É muito mais que uma festa, é família e amizade.",
-    autor: "Lucas, 2022"
-  }
-];
 
 const destaques = [
   {
@@ -154,7 +144,7 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
         <div className={`max-w-5xl mx-auto mb-16 transition-all duration-1000 delay-300 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {photos.map((image, index) => (
               <div key={index} className="group">
                 <div 
@@ -211,29 +201,12 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
           </Button>
         </div>
 
-        {/* Depoimentos */}
+
+        {/* Destaques */}
         <div className={`max-w-4xl mx-auto mb-16 transition-all duration-1000 delay-500 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
-          <div className="grid md:grid-cols-2 gap-8">
-            {depoimentos.map((depoimento, index) => (
-              <div key={index} className="bg-white/80 backdrop-blur-sm p-6 rounded-lg border-l-4 border-primary">
-                <p className="text-lg italic text-foreground mb-3">
-                  "{depoimento.texto}"
-                </p>
-                <p className="text-sm font-montserrat font-semibold text-primary">
-                  — {depoimento.autor}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Destaques */}
-        <div className={`max-w-4xl mx-auto mb-16 transition-all duration-1000 delay-700 transform ${
-          isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-        }`}>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {destaques.map((destaque, index) => (
               <div key={index} className="text-center bg-card p-6 rounded-lg shadow-card">
                 <destaque.icon className="w-8 h-8 text-primary mx-auto mb-3" />
@@ -249,7 +222,7 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
         </div>
 
         {/* CTA e Instagram */}
-        <div className={`text-center transition-all duration-1000 delay-900 transform ${
+        <div className={`text-center transition-all duration-1000 delay-700 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-8 max-w-3xl mx-auto mb-8">

@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Shield, Check, ArrowRight } from "lucide-react";
 import { PaymentMethodModal } from "./PaymentMethodModal";
@@ -14,14 +15,15 @@ export const DonationForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    cpf: '',
+    telefone: '',
     paymentMethod: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activePaymentType, setActivePaymentType] = useState<'onetime' | 'installment' | null>(null);
   const [showPixModal, setShowPixModal] = useState(false);
+  const [donationConfirmed, setDonationConfirmed] = useState(false);
   const { toast } = useToast();
-  
+
   const PIX_CODE = "00020126440014br.gov.bcb.pix0122unne.cambury@gmail.com27600016BR.COM.PAGSEGURO0136E4BDA145-AEE6-4416-A353-561976EFC0835204000053039865406810.005802BR5919EDSON ROBERTO FORAO6009Sao Paulo62290525PAGS0000810002509201311866304F775";
   
   // Track session for funnel analytics
@@ -49,9 +51,13 @@ export const DonationForm = () => {
     }
   };
 
-  const formatCPF = (value: string) => {
+  const formatTelefone = (value: string) => {
     const numbers = value.replace(/\D/g, '');
-    return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    if (numbers.length <= 10) {
+      return numbers.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    } else {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
   };
 
   const handlePaymentTypeSelect = async (paymentType: 'onetime' | 'installment') => {
@@ -67,40 +73,41 @@ export const DonationForm = () => {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email) {
+    if (!formData.name || !formData.email || !formData.telefone) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha nome e email.",
+        description: "Por favor, preencha nome, email e telefone.",
         variant: "destructive"
       });
       return;
     }
 
-    // Para pagamento à vista, verificar se método de pagamento foi selecionado
-    if (activePaymentType === 'onetime' && !formData.paymentMethod) {
+    if (!donationConfirmed) {
       toast({
-        title: "Método de pagamento obrigatório",
-        description: "Por favor, selecione o método de pagamento.",
-        variant: "destructive"
+        title: "Confirmação necessária",
+        description: "Por favor, confirme que está fazendo uma doação para a UNNE Cambury.",
+        variant: "destructive",
       });
       return;
+    }
+
+    // Para pagamento à vista, definir automaticamente como PIX
+    if (activePaymentType === 'onetime') {
+      setFormData(prev => ({ ...prev, paymentMethod: 'pix' }));
     }
 
     // Track form submission
     await trackEvent('form_submitted', {
-      has_cpf: !!formData.cpf,
+      has_telefone: !!formData.telefone,
       name_length: formData.name.length,
       email_domain: formData.email.split('@')[1] || 'unknown',
       payment_type: activePaymentType,
-      payment_method: formData.paymentMethod || 'card'
+      payment_method: activePaymentType === 'onetime' ? 'pix' : (formData.paymentMethod || 'card')
     });
 
     if (activePaymentType === 'onetime') {
-      if (formData.paymentMethod === 'pix') {
-        setShowPixModal(true);
-      } else {
-        handleOneTimePayment();
-      }
+      // Pagamento à vista é sempre PIX
+      setShowPixModal(true);
     } else {
       handleInstallmentPayment();
     }
@@ -112,7 +119,7 @@ export const DonationForm = () => {
     try {
       // Track payment method selection
       await trackEvent('payment_method_selected', {
-        payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão',
+        payment_method: 'pix',
         amount: 810,
         currency: 'BRL'
       });
@@ -124,7 +131,7 @@ export const DonationForm = () => {
         body: {
           name: formData.name,
           email: formData.email,
-          cpf: formData.cpf,
+          telefone: formData.telefone,
           payment_method: "à vista"
         }
       });
@@ -135,7 +142,7 @@ export const DonationForm = () => {
 
       // Track checkout initiation
       await trackEvent('checkout_started', {
-        payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão',
+        payment_method: 'pix',
         checkout_type: 'one_time'
       });
       
@@ -143,16 +150,16 @@ export const DonationForm = () => {
         body: {
           name: formData.name,
           email: formData.email,
-          cpf: formData.cpf,
+          telefone: formData.telefone,
           payment_mode: "one_time",
-          payment_method: formData.paymentMethod || 'cartao'
+          payment_method: 'pix'
         }
       });
 
       if (error) {
         await trackEvent('checkout_error', {
           error: error.message,
-          payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão'
+          payment_method: 'pix'
         });
         throw error;
       }
@@ -161,7 +168,7 @@ export const DonationForm = () => {
       
       // Track successful checkout session creation
       await trackEvent('checkout_session_created', {
-        payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão',
+        payment_method: 'pix',
         checkout_session_id: data.url ? 'generated' : 'failed'
       });
       
@@ -169,7 +176,7 @@ export const DonationForm = () => {
       if (data.url) {
         // Track redirect to Stripe
         await trackEvent('redirected_to_stripe', {
-          payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão'
+          payment_method: 'pix'
         });
         window.open(data.url, '_blank');
       }
@@ -178,10 +185,10 @@ export const DonationForm = () => {
       console.error("Error creating one-time payment:", error);
       await trackEvent('payment_error', {
         error: error instanceof Error ? error.message : 'Unknown error',
-        payment_method: formData.paymentMethod === 'pix' ? 'pix' : 'cartão'
+        payment_method: 'pix'
       });
       toast({
-        title: `Erro no pagamento${formData.paymentMethod === 'pix' ? ' via PIX' : ''}`,
+        title: "Erro no pagamento via PIX",
         description: "Não foi possível processar o pagamento. Tente novamente.",
         variant: "destructive"
       });
@@ -209,7 +216,7 @@ export const DonationForm = () => {
         body: {
           name: formData.name,
           email: formData.email,
-          cpf: formData.cpf,
+          telefone: formData.telefone,
           payment_method: "parcelado"
         }
       });
@@ -228,7 +235,7 @@ export const DonationForm = () => {
         body: {
           name: formData.name,
           email: formData.email,
-          cpf: formData.cpf,
+          telefone: formData.telefone,
           payment_mode: "installment"
         }
       });
@@ -276,8 +283,8 @@ export const DonationForm = () => {
 
 
   const handleInputChange = (field: string, value: string) => {
-    if (field === 'cpf') {
-      value = formatCPF(value);
+    if (field === 'telefone') {
+      value = formatTelefone(value);
     }
     
     setFormData(prev => ({
@@ -289,7 +296,7 @@ export const DonationForm = () => {
   const benefits = [
     {
       title: "Acesso exclusivo à festa",
-      description: "Garantia de entrada na celebração mais aguardada de Camburi."
+      description: "Garantia de entrada na celebração mais aguardada de Cambury."
     },
     {
       title: "Segurança garantida",
@@ -306,23 +313,23 @@ export const DonationForm = () => {
   ];
 
   return (
-    <section id="donation-form" className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <div className="container mx-auto px-6">
+    <section id="donation-form" className="py-12 sm:py-16 md:py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-montserrat font-bold text-white mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-montserrat font-bold text-white mb-4">
             Festa de Fim de Ano
-          </h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            </h2>
+          <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
             Sua contribuição torna tudo possível, tornando mais fácil e melhor para todos e em todos os lugares.
-          </p>
-        </div>
+            </p>
+          </div>
 
         {/* Two-column payment options */}
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
           
           {/* One-time Payment - Left */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-8 relative overflow-hidden">
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
             
             <div className="relative z-10">
@@ -354,51 +361,57 @@ export const DonationForm = () => {
               {activePaymentType === 'onetime' ? (
                 <div className="animate-fade-in animate-scale-in">
                   <form onSubmit={handleFormSubmit} className="space-y-4">
+                  <Input
+                    type="text"
+                    placeholder="Digite seu nome completo"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    required
+                      className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
+                    />
+                  <Input
+                    type="email"
+                    placeholder="Digite seu email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    required
+                      className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
+                    />
                     <Input
                       type="text"
-                      placeholder="Digite seu nome completo"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      placeholder="Telefone"
+                      value={formData.telefone}
+                      onChange={(e) => handleInputChange('telefone', e.target.value)}
+                      maxLength={15}
                       required
                       className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
                     />
-                    <Input
-                      type="email"
-                      placeholder="Digite seu email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      required
-                      className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
-                    />
-                    <Input
-                      type="text"
-                      placeholder="CPF (opcional)"
-                      value={formData.cpf}
-                      onChange={(e) => handleInputChange('cpf', e.target.value)}
-                      maxLength={14}
-                      className="bg-gray-50 border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-primary"
-                    />
+                    
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Checkbox 
+                        id="donation-confirmation-1" 
+                        checked={donationConfirmed}
+                        onCheckedChange={(checked) => setDonationConfirmed(checked as boolean)}
+                      />
+                      <Label 
+                        htmlFor="donation-confirmation-1" 
+                        className="text-sm text-gray-700 cursor-pointer"
+                      >
+                        Ao aceitar confirmo que estou fazendo uma <span className="text-green-600 font-medium">doação</span> para a UNNE Cambury
+                      </Label>
+                    </div>
                     
                     <div>
                       <Label className="text-gray-700 text-sm font-medium mb-2 block">
                         Método de Pagamento
                       </Label>
-                      <Select
-                        value={formData.paymentMethod}
-                        onValueChange={(value) => handleInputChange('paymentMethod', value)}
-                      >
-                        <SelectTrigger className="bg-gray-50 border-gray-300 text-gray-900 focus:border-primary">
-                          <SelectValue placeholder="Selecione o método" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white border-gray-300 z-50">
-                          <SelectItem value="cartao" className="hover:bg-gray-100">
-                            Cartão
-                          </SelectItem>
-                          <SelectItem value="pix" className="hover:bg-gray-100">
-                            Pix
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <div>
+                          <p className="text-green-800 font-medium text-sm">Pagamento via PIX</p>
+                          <p className="text-green-600 text-xs">Pagamento à vista disponível apenas via PIX</p>
+                        </div>
+                      </div>
                     </div>
                     
                     <div className="flex items-center gap-2 text-gray-600 text-xs mb-4">
@@ -408,8 +421,8 @@ export const DonationForm = () => {
 
                     <Button
                       type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all hover-scale"
+                      disabled={isSubmitting || !donationConfirmed}
+                      className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-xl transition-all hover-scale disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSubmitting ? (
                         <div className="flex items-center justify-center">
@@ -440,7 +453,7 @@ export const DonationForm = () => {
           </div>
 
           {/* Installment Payment - Right */}
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 relative overflow-hidden">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-gray-800/5 to-transparent"></div>
             
             <div className="relative z-10">
@@ -468,14 +481,14 @@ export const DonationForm = () => {
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
 
               {/* Form or Button */}
               {activePaymentType === 'installment' ? (
                 <div className="animate-fade-in animate-scale-in">
                   <form onSubmit={handleFormSubmit} className="space-y-4">
-                    <Input
-                      type="text"
+                  <Input
+                    type="text"
                       placeholder="Digite seu nome completo"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
@@ -487,41 +500,57 @@ export const DonationForm = () => {
                       placeholder="Digite seu email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      required
+                    required
                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
                     />
                     <Input
                       type="text"
-                      placeholder="CPF (opcional)"
-                      value={formData.cpf}
-                      onChange={(e) => handleInputChange('cpf', e.target.value)}
-                      maxLength={14}
+                      placeholder="Telefone"
+                      value={formData.telefone}
+                      onChange={(e) => handleInputChange('telefone', e.target.value)}
+                      maxLength={15}
+                      required
                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
                     />
+                    
+                    <div className="flex items-center space-x-2 mb-4">
+                      <Checkbox 
+                        id="donation-confirmation-2" 
+                        checked={donationConfirmed}
+                        onCheckedChange={(checked) => setDonationConfirmed(checked as boolean)}
+                        className="border-gray-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                      />
+                      <Label 
+                        htmlFor="donation-confirmation-2" 
+                        className="text-sm text-gray-300 cursor-pointer"
+                      >
+                        Ao aceitar confirmo que estou fazendo uma <span className="text-green-400 font-medium">doação</span> para a UNNE Cambury
+                      </Label>
+                    </div>
                     
                     <div className="flex items-center gap-2 text-gray-400 text-xs mb-4">
                       <Shield className="w-3 h-3" />
                       <span>Pagamento 100% seguro</span>
-                    </div>
+                </div>
 
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all hover-scale"
-                    >
-                      {isSubmitting ? (
-                        <div className="flex items-center justify-center">
+                <Button
+                  type="submit"
+                      disabled={isSubmitting || !donationConfirmed}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition-all hover-scale disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                           Processando...
-                        </div>
-                      ) : (
+                    </div>
+                  ) : (
                         <div className="flex items-center justify-center gap-2">
                           <span>Prosseguir para pagamento</span>
                           <ArrowRight className="w-4 h-4" />
                         </div>
-                      )}
-                    </Button>
-                  </form>
+                  )}
+                </Button>
+              </form>
                 </div>
               ) : (
                 <Button
@@ -545,6 +574,10 @@ export const DonationForm = () => {
         onClose={() => setShowPixModal(false)}
         pixCode={PIX_CODE}
         amount={810}
+        onPaymentConfirmed={() => {
+          // Aqui você pode adicionar lógica adicional após confirmação do pagamento
+          console.log('Pagamento PIX confirmado pelo usuário');
+        }}
       />
     </section>
   );

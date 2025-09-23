@@ -10,9 +10,10 @@ interface PixPaymentModalProps {
   onClose: () => void;
   pixCode: string;
   amount: number;
+  onPaymentConfirmed?: () => void;
 }
 
-export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount }: PixPaymentModalProps) => {
+export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentConfirmed }: PixPaymentModalProps) => {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -50,12 +51,23 @@ export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount }: PixPayment
     }
   };
 
+  const handlePaymentConfirmed = () => {
+    toast({
+      title: "Pagamento confirmado!",
+      description: "Obrigado pela sua contribuição. Entraremos em contato em breve.",
+    });
+    if (onPaymentConfirmed) {
+      onPaymentConfirmed();
+    }
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl font-semibold">
+            <DialogTitle className="text-lg sm:text-xl font-semibold">
               Pagamento PIX
             </DialogTitle>
             <Button
@@ -69,76 +81,103 @@ export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount }: PixPayment
           </div>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Amount */}
           <div className="text-center">
             <p className="text-sm text-muted-foreground">Valor a pagar</p>
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-xl sm:text-2xl font-bold text-primary">
               R$ {amount.toFixed(2).replace('.', ',')}
             </p>
           </div>
 
-          {/* QR Code */}
-          <div className="flex justify-center">
-            {qrCodeDataUrl ? (
-              <div className="p-4 bg-white rounded-lg border">
-                <img 
-                  src={qrCodeDataUrl} 
-                  alt="QR Code PIX" 
-                  className="w-48 h-48"
-                />
-              </div>
-            ) : (
-              <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>
-            )}
-          </div>
+          {/* Main Content - Responsive Layout */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+            {/* QR Code */}
+            <div className="flex-shrink-0 flex justify-center sm:justify-start">
+              {qrCodeDataUrl ? (
+                <div className="p-3 bg-white rounded-lg border">
+                  <img 
+                    src={qrCodeDataUrl} 
+                    alt="QR Code PIX" 
+                    className="w-40 h-40 sm:w-32 sm:h-32"
+                  />
+                </div>
+              ) : (
+                <div className="w-40 h-40 sm:w-32 sm:h-32 bg-muted rounded-lg flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                </div>
+              )}
+            </div>
 
-          {/* Instructions */}
-          <div className="text-center space-y-2">
-            <p className="text-sm font-medium">Como pagar:</p>
-            <ol className="text-xs text-muted-foreground space-y-1">
-              <li>1. Abra o app do seu banco</li>
-              <li>2. Escaneie o QR Code acima</li>
-              <li>3. Ou copie e cole o código PIX</li>
-              <li>4. Confirme o pagamento</li>
-            </ol>
-          </div>
-
-          {/* PIX Code */}
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Código PIX:</p>
-            <div className="relative">
-              <div className="p-3 bg-muted rounded-lg text-xs font-mono break-all">
-                {pixCode}
+            {/* Instructions and PIX Code */}
+            <div className="flex-1 space-y-4">
+              {/* Instructions */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Como pagar:</p>
+                <ol className="text-xs sm:text-sm text-muted-foreground space-y-1">
+                  <li>1. Abra o app do seu banco</li>
+                  <li>2. Escaneie o QR Code <span className="sm:hidden">acima</span><span className="hidden sm:inline">ao lado</span></li>
+                  <li>3. Ou copie e cole o código PIX abaixo</li>
+                  <li>4. Confirme o pagamento</li>
+                </ol>
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCopyPixCode}
-                className="mt-2 w-full"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4 mr-2" />
-                    Copiado!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copiar código PIX
-                  </>
-                )}
-              </Button>
+
+              {/* PIX Code */}
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Código PIX:</p>
+                <div className="relative">
+                  <div className="p-2 bg-muted rounded-lg text-xs font-mono break-all max-h-20 overflow-y-auto">
+                    {pixCode}
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleCopyPixCode}
+                    className="mt-2 w-full"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Copiado!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 mr-2" />
+                        Copiar código PIX
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground">
-              O pagamento será processado automaticamente após a confirmação.
-            </p>
+          {/* Payment Confirmation Section */}
+          <div className="border-t pt-4 space-y-3">
+            {/* Warning Message */}
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-red-800 text-sm font-medium">
+                ⚠️ Após o pagamento via PIX, volte aqui e confirme o envio
+              </p>
+            </div>
+
+            {/* Confirmation Button */}
+            <div className="text-center">
+              <Button
+                onClick={handlePaymentConfirmed}
+                className="bg-green-600 hover:bg-green-700 text-white px-8"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Confirmar Pagamento Realizado
+              </Button>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">
+                Clique em "Confirmar Pagamento Realizado" após efetuar o PIX.
+              </p>
+            </div>
           </div>
         </div>
       </DialogContent>

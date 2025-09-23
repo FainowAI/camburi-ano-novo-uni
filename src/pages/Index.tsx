@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { HeroSection } from "@/components/HeroSection";
 import { GallerySection } from "@/components/GallerySection";
 import { MissionSection } from "@/components/MissionSection";
-import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { DonationForm } from "@/components/DonationForm";
 
 const Index = () => {
@@ -17,7 +16,6 @@ const Index = () => {
       <HeroSection onScrollToForm={scrollToForm} />
       <GallerySection onScrollToForm={scrollToForm} />
       <MissionSection />
-      <TestimonialsSection />
       <div ref={formRef}>
         <DonationForm />
       </div>

@@ -44,19 +44,19 @@ export const MissionSection = () => {
   ];
 
   return (
-    <section id="mission-section" className="py-20 bg-background">
-      <div className="container mx-auto px-6">
-        <div className={`text-center mb-16 transition-all duration-1000 transform ${
+    <section id="mission-section" className="py-12 sm:py-16 md:py-20 bg-background">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className={`text-center mb-8 sm:mb-12 md:mb-16 transition-all duration-1000 transform ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
         }`}>
-          <h2 className="text-4xl font-montserrat font-bold text-foreground mb-8">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-montserrat font-bold text-foreground mb-6 sm:mb-8">
             Nossa <span className="text-primary">Missão</span>
           </h2>
           
           <div className="max-w-4xl mx-auto">
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              A UNNE Camburi dedica-se a manter a segurança, lazer, limpeza e divertimento 
-              para a praia de Camburi, criando um ambiente perfeito para famílias e amigos 
+              A UNNE Cambury dedica-se a manter a segurança, lazer, limpeza e divertimento 
+              para a praia de Cambury, criando um ambiente perfeito para famílias e amigos 
               celebrarem juntos.
             </p>
             
@@ -69,7 +69,7 @@ export const MissionSection = () => {
         </div>
 
         {/* Mission Items Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-6xl mx-auto">
           {missionItems.map((item, index) => (
             <div
               key={index}

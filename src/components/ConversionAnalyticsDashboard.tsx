@@ -120,11 +120,11 @@ export const ConversionAnalyticsDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-3 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-            <span className="ml-4 text-white">Carregando métricas...</span>
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-white"></div>
+            <span className="mt-4 text-sm sm:text-base text-white text-center">Carregando métricas...</span>
           </div>
         </div>
       </div>
@@ -133,7 +133,7 @@ export const ConversionAnalyticsDashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-3 sm:p-6">
         <div className="max-w-7xl mx-auto">
           <Card className="bg-red-900/20 border-red-700">
             <CardHeader>
@@ -168,23 +168,23 @@ export const ConversionAnalyticsDashboard = () => {
   const abandonmentRate = parseFloat(analytics.funnel.abandonment_rate);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">
               Métricas de Conversão
             </h1>
-            <p className="text-gray-400">
+            <p className="text-sm sm:text-base text-gray-400">
               Dashboard de análise do funil de pagamentos - {analytics.period}
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <select 
               value={selectedPeriod} 
               onChange={(e) => setSelectedPeriod(Number(e.target.value))}
-              className="bg-gray-800 text-white border border-gray-600 rounded-lg px-3 py-2"
+              className="bg-gray-800 text-white border border-gray-600 rounded-lg px-3 py-2 text-sm sm:text-base w-full sm:w-auto"
             >
               <option value={7}>Últimos 7 dias</option>
               <option value={30}>Últimos 30 dias</option>
@@ -194,6 +194,7 @@ export const ConversionAnalyticsDashboard = () => {
               onClick={() => fetchAnalytics(selectedPeriod)}
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
             >
               <RefreshCw className="w-4 h-4 mr-2" />
               Atualizar
@@ -202,54 +203,54 @@ export const ConversionAnalyticsDashboard = () => {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <Users className="w-4 h-4" />
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-400 flex items-center gap-2">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                 Total de Sessões
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">{totalSessions}</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">{totalSessions}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <ShoppingCart className="w-4 h-4" />
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-400 flex items-center gap-2">
+                <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4" />
                 Taxa de Conversão
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-400">
+              <div className="text-xl sm:text-2xl font-bold text-green-400">
                 {analytics.funnel.overall_conversion}%
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                <CreditCard className="w-4 h-4" />
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-400 flex items-center gap-2">
+                <CreditCard className="w-3 h-3 sm:w-4 sm:h-4" />
                 Pagamentos Concluídos
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-400">{completedPayments}</div>
+              <div className="text-xl sm:text-2xl font-bold text-blue-400">{completedPayments}</div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-800 border-gray-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-400 flex items-center gap-2">
-                {abandonmentRate > 50 ? <TrendingDown className="w-4 h-4 text-red-400" /> : <TrendingUp className="w-4 h-4 text-green-400" />}
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-gray-400 flex items-center gap-2">
+                {abandonmentRate > 50 ? <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" /> : <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />}
                 Taxa de Abandono
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={`text-2xl font-bold ${abandonmentRate > 50 ? 'text-red-400' : 'text-green-400'}`}>
+              <div className={`text-xl sm:text-2xl font-bold ${abandonmentRate > 50 ? 'text-red-400' : 'text-green-400'}`}>
                 {analytics.funnel.abandonment_rate}%
               </div>
             </CardContent>
@@ -257,11 +258,11 @@ export const ConversionAnalyticsDashboard = () => {
         </div>
 
         {/* Funnel Analysis */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <BarChart3 className="w-5 h-5" />
+              <CardTitle className="text-white flex items-center gap-2 text-sm sm:text-base">
+                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
                 Funil de Conversão
               </CardTitle>
             </CardHeader>
@@ -275,8 +276,8 @@ export const ConversionAnalyticsDashboard = () => {
           {/* Payment Methods */}
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <PieChart className="w-5 h-5" />
+              <CardTitle className="text-white flex items-center gap-2 text-sm sm:text-base">
+                <PieChart className="w-4 h-4 sm:w-5 sm:h-5" />
                 Métodos de Pagamento
               </CardTitle>
             </CardHeader>
@@ -301,22 +302,22 @@ export const ConversionAnalyticsDashboard = () => {
         {/* Daily Activity */}
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
+            <CardTitle className="text-white flex items-center gap-2 text-sm sm:text-base">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
               Atividade Diária
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
               {analytics.daily.slice(-7).map((day) => (
-                <div key={day.date} className="bg-gray-700 rounded-lg p-3 text-center">
+                <div key={day.date} className="bg-gray-700 rounded-lg p-2 sm:p-3 text-center">
                   <div className="text-xs text-gray-400 mb-1">
                     {new Date(day.date).toLocaleDateString('pt-BR', { 
                       day: '2-digit', 
                       month: '2-digit' 
                     })}
                   </div>
-                  <div className="text-lg font-bold text-white">{day.total_activity}</div>
+                  <div className="text-base sm:text-lg font-bold text-white">{day.total_activity}</div>
                   <div className="text-xs text-gray-400">atividades</div>
                 </div>
               ))}
