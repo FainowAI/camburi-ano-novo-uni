@@ -36,7 +36,6 @@ serve(async (req) => {
       event_type,
       user_name,
       user_email,
-      user_cpf,
       payment_method,
       checkout_session_id,
       metadata = {}
@@ -55,7 +54,6 @@ serve(async (req) => {
         event_type,
         user_name,
         user_email,
-        user_cpf,
         payment_method,
         checkout_session_id,
         metadata
