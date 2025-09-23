@@ -17,9 +17,14 @@ interface PixPaymentModalProps {
     email: string;
     telefone: string;
   };
+  analytics?: {
+    trackPixCodeCopy: () => void;
+    trackPixPaymentConfirmed: () => void;
+    trackPixModalClose: (reason: 'confirmed' | 'cancelled' | 'abandoned') => void;
+  };
 }
 
-export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentConfirmed, userData }: PixPaymentModalProps) => {
+export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentConfirmed, userData, analytics }: PixPaymentModalProps) => {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -43,6 +48,10 @@ export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentCon
     try {
       await navigator.clipboard.writeText(pixCode);
       setCopied(true);
+      
+      // Track PIX code copy event
+      analytics?.trackPixCodeCopy();
+      
       toast({
         title: "Código PIX copiado!",
         description: "O código foi copiado para sua área de transferência.",
@@ -59,6 +68,9 @@ export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentCon
 
   const handlePaymentConfirmed = async () => {
     try {
+      // Track PIX payment confirmation
+      analytics?.trackPixPaymentConfirmed();
+      
       // Send payment log with pagou_pix = true
       if (userData) {
         const { error: logError } = await supabase.functions.invoke('log-payment', {
@@ -84,6 +96,9 @@ export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentCon
       if (onPaymentConfirmed) {
         onPaymentConfirmed();
       }
+      
+      // Track modal close as confirmed
+      analytics?.trackPixModalClose('confirmed');
       onClose();
     } catch (error) {
       console.error("Error confirming payment:", error);

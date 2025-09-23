@@ -10,6 +10,7 @@ import { CreditCard, Shield, Check, ArrowRight } from "lucide-react";
 import { PaymentMethodModal } from "./PaymentMethodModal";
 import { PixPaymentModal } from "./PixPaymentModal";
 import { supabase } from "@/integrations/supabase/client";
+import { useGranularAnalytics } from "@/hooks/useGranularAnalytics";
 
 export const DonationForm = () => {
   const [formData, setFormData] = useState({
@@ -26,30 +27,8 @@ export const DonationForm = () => {
 
   const PIX_CODE = "00020126440014br.gov.bcb.pix0122unne.cambury@gmail.com27600016BR.COM.PAGSEGURO0136E4BDA145-AEE6-4416-A353-561976EFC0835204000053039865406810.005802BR5919EDSON ROBERTO FORAO6009Sao Paulo62290525PAGS0000810002509201311866304F775";
   
-  // Track session for funnel analytics
-  const sessionId = useRef(crypto.randomUUID());
-
-  // Helper function to track events
-  const trackEvent = async (eventType: string, additionalData = {}) => {
-    try {
-      await supabase.functions.invoke('track-checkout-event', {
-        body: {
-          session_id: sessionId.current,
-          event_type: eventType,
-          user_name: formData.name || null,
-          user_email: formData.email || null,
-          user_cpf: null,
-          metadata: {
-            timestamp: new Date().toISOString(),
-            ...additionalData
-          }
-        }
-      });
-      console.log(`[ANALYTICS] Event tracked: ${eventType}`, additionalData);
-    } catch (error) {
-      console.error("Error tracking event:", error);
-    }
-  };
+  // Initialize granular analytics
+  const analytics = useGranularAnalytics();
 
   const formatTelefone = (value: string) => {
     const numbers = value.replace(/\D/g, '');
@@ -63,17 +42,20 @@ export const DonationForm = () => {
   const handlePaymentTypeSelect = async (paymentType: 'onetime' | 'installment') => {
     setActivePaymentType(paymentType);
     
-    // Track payment type selection
-      await trackEvent('payment_type_selected', {
-        payment_type: paymentType,
-        amount: paymentType === 'onetime' ? 810 : 945
-      });
+    // Track payment type selection with granular analytics
+    await analytics.trackPaymentTypeSelection(
+      paymentType, 
+      paymentType === 'onetime' ? 810 : 945
+    );
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.email || !formData.telefone) {
+      // Track validation error
+      analytics.trackFormValidationError('required_fields', 'Nome, email e telefone são obrigatórios');
+      
       toast({
         title: "Campos obrigatórios",
         description: "Por favor, preencha nome, email e telefone.",
@@ -83,6 +65,9 @@ export const DonationForm = () => {
     }
 
     if (!donationConfirmed) {
+      // Track validation error
+      analytics.trackFormValidationError('terms_confirmation', 'Confirmação de doação necessária');
+      
       toast({
         title: "Confirmação necessária",
         description: "Por favor, confirme que está fazendo uma doação para a UNNE Cambury.",
@@ -91,13 +76,16 @@ export const DonationForm = () => {
       return;
     }
 
+    // Update user info for tracking
+    analytics.updateUserInfo(formData.name, formData.email);
+
     // Para pagamento à vista, definir automaticamente como PIX
     if (activePaymentType === 'onetime') {
       setFormData(prev => ({ ...prev, paymentMethod: 'pix' }));
     }
 
-    // Track form submission
-    await trackEvent('form_submitted', {
+    // Track form submission with granular data
+    await analytics.trackEvent('form_submitted', {
       has_telefone: !!formData.telefone,
       name_length: formData.name.length,
       email_domain: formData.email.split('@')[1] || 'unknown',
@@ -106,7 +94,8 @@ export const DonationForm = () => {
     });
 
     if (activePaymentType === 'onetime') {
-      // Pagamento à vista é sempre PIX
+      // Pagamento à vista é sempre PIX - track modal opening
+      analytics.trackPixModalOpen(810);
       setShowPixModal(true);
     } else {
       handleInstallmentPayment();
@@ -117,8 +106,8 @@ export const DonationForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Track payment method selection
-      await trackEvent('payment_method_selected', {
+      // Track payment method selection with granular analytics
+      await analytics.trackEvent('payment_method_selected', {
         payment_method: 'pix',
         amount: 810,
         currency: 'BRL'
@@ -127,7 +116,7 @@ export const DonationForm = () => {
       console.log("Logging payment selection and initiating one-time Stripe payment with data:", formData);
       
       // Track checkout initiation
-      await trackEvent('checkout_started', {
+      await analytics.trackEvent('checkout_started', {
         payment_method: 'pix',
         checkout_type: 'one_time'
       });
@@ -143,7 +132,7 @@ export const DonationForm = () => {
       });
 
       if (error) {
-        await trackEvent('checkout_error', {
+        await analytics.trackEvent('checkout_error', {
           error: error.message,
           payment_method: 'pix'
         });
@@ -153,7 +142,7 @@ export const DonationForm = () => {
       console.log("Payment session created:", data);
       
       // Track successful checkout session creation
-      await trackEvent('checkout_session_created', {
+      await analytics.trackEvent('checkout_session_created', {
         payment_method: 'pix',
         checkout_session_id: data.url ? 'generated' : 'failed'
       });
@@ -161,7 +150,7 @@ export const DonationForm = () => {
       // Redirecionar para Stripe Checkout
       if (data.url) {
         // Track redirect to Stripe
-        await trackEvent('redirected_to_stripe', {
+        await analytics.trackEvent('redirected_to_stripe', {
           payment_method: 'pix'
         });
         window.open(data.url, '_blank');
@@ -169,7 +158,7 @@ export const DonationForm = () => {
 
     } catch (error) {
       console.error("Error creating one-time payment:", error);
-      await trackEvent('payment_error', {
+      await analytics.trackEvent('payment_error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         payment_method: 'pix'
       });
@@ -187,8 +176,8 @@ export const DonationForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Track payment method selection
-      await trackEvent('payment_method_selected', {
+      // Track payment method selection with granular analytics
+      await analytics.trackEvent('payment_method_selected', {
         payment_method: 'parcelado',
         amount: 945,
         installments: 4,
@@ -212,7 +201,7 @@ export const DonationForm = () => {
       }
 
       // Track checkout initiation
-      await trackEvent('checkout_started', {
+      await analytics.trackEvent('checkout_started', {
         payment_method: 'parcelado',
         checkout_type: 'installment'
       });
@@ -227,7 +216,7 @@ export const DonationForm = () => {
       });
 
       if (error) {
-        await trackEvent('checkout_error', {
+        await analytics.trackEvent('checkout_error', {
           error: error.message,
           payment_method: 'parcelado'
         });
@@ -237,7 +226,7 @@ export const DonationForm = () => {
       console.log("Installment payment session created:", data);
       
       // Track successful checkout session creation
-      await trackEvent('checkout_session_created', {
+      await analytics.trackEvent('checkout_session_created', {
         payment_method: 'parcelado',
         checkout_session_id: data.url ? 'generated' : 'failed'
       });
@@ -245,7 +234,7 @@ export const DonationForm = () => {
       // Redirecionar para Stripe Checkout
       if (data.url) {
         // Track redirect to Stripe
-        await trackEvent('redirected_to_stripe', {
+        await analytics.trackEvent('redirected_to_stripe', {
           payment_method: 'parcelado'
         });
         window.open(data.url, '_blank');
@@ -253,7 +242,7 @@ export const DonationForm = () => {
 
     } catch (error) {
       console.error("Error creating installment payment:", error);
-      await trackEvent('payment_error', {
+      await analytics.trackEvent('payment_error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         payment_method: 'parcelado'
       });
@@ -277,6 +266,9 @@ export const DonationForm = () => {
       ...prev,
       [field]: value
     }));
+
+    // Track field completion with granular analytics
+    analytics.trackFormFieldBlur(field, value);
   };
 
   const benefits = [
@@ -473,46 +465,52 @@ export const DonationForm = () => {
               {activePaymentType === 'installment' ? (
                 <div className="animate-fade-in animate-scale-in">
                   <form onSubmit={handleFormSubmit} className="space-y-4">
-                  <Input
-                    type="text"
-                      placeholder="Digite seu nome completo"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      required
-                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
-                    />
-                    <Input
-                      type="email"
-                      placeholder="Digite seu email"
-                      value={formData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                    required
-                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
-                    />
-                    <Input
-                      type="text"
-                      placeholder="Telefone"
-                      value={formData.telefone}
-                      onChange={(e) => handleInputChange('telefone', e.target.value)}
-                      maxLength={15}
-                      required
-                      className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
-                    />
-                    
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Checkbox 
-                        id="donation-confirmation-2" 
-                        checked={donationConfirmed}
-                        onCheckedChange={(checked) => setDonationConfirmed(checked as boolean)}
-                        className="border-gray-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                      />
-                      <Label 
-                        htmlFor="donation-confirmation-2" 
-                        className="text-sm text-gray-300 cursor-pointer"
-                      >
-                        Ao aceitar confirmo que estou fazendo uma <span className="text-green-400 font-medium">doação</span> para a UNNE Cambury
-                      </Label>
-                    </div>
+                   <Input
+                     type="text"
+                       placeholder="Digite seu nome completo"
+                       value={formData.name}
+                       onFocus={() => analytics.trackFormFieldFocus('name')}
+                       onChange={(e) => handleInputChange('name', e.target.value)}
+                       required
+                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
+                     />
+                     <Input
+                       type="email"
+                       placeholder="Digite seu email"
+                       value={formData.email}
+                       onFocus={() => analytics.trackFormFieldFocus('email')}
+                       onChange={(e) => handleInputChange('email', e.target.value)}
+                     required
+                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
+                     />
+                     <Input
+                       type="text"
+                       placeholder="Telefone"
+                       value={formData.telefone}
+                       onFocus={() => analytics.trackFormFieldFocus('telefone')}
+                       onChange={(e) => handleInputChange('telefone', e.target.value)}
+                       maxLength={15}
+                       required
+                       className="bg-gray-700 border-gray-600 text-white placeholder:text-gray-400 focus:border-primary"
+                     />
+                     
+                     <div className="flex items-center space-x-2 mb-4">
+                       <Checkbox 
+                         id="donation-confirmation-2" 
+                         checked={donationConfirmed}
+                         onCheckedChange={(checked) => {
+                           setDonationConfirmed(checked as boolean);
+                           analytics.trackCheckboxInteraction('donation-confirmation-2', checked as boolean);
+                         }}
+                         className="border-gray-600 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                       />
+                       <Label 
+                         htmlFor="donation-confirmation-2" 
+                         className="text-sm text-gray-300 cursor-pointer"
+                       >
+                         Ao aceitar confirmo que estou fazendo uma <span className="text-green-400 font-medium">doação</span> para a UNNE Cambury
+                       </Label>
+                     </div>
                     
                     <div className="flex items-center gap-2 text-gray-400 text-xs mb-4">
                       <Shield className="w-3 h-3" />
@@ -557,7 +555,10 @@ export const DonationForm = () => {
       {/* PIX Payment Modal */}
       <PixPaymentModal
         isOpen={showPixModal}
-        onClose={() => setShowPixModal(false)}
+        onClose={() => {
+          analytics.trackPixModalClose('cancelled');
+          setShowPixModal(false);
+        }}
         pixCode={PIX_CODE}
         amount={810}
         userData={{
@@ -565,6 +566,7 @@ export const DonationForm = () => {
           email: formData.email,
           telefone: formData.telefone
         }}
+        analytics={analytics}
         onPaymentConfirmed={() => {
           // Aqui você pode adicionar lógica adicional após confirmação do pagamento
           console.log('Pagamento PIX confirmado pelo usuário');
