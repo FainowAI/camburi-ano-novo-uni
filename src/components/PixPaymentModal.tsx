@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Copy, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import QRCode from "qrcode";
 
 interface PixPaymentModalProps {
@@ -11,9 +12,14 @@ interface PixPaymentModalProps {
   pixCode: string;
   amount: number;
   onPaymentConfirmed?: () => void;
+  userData?: {
+    name: string;
+    email: string;
+    telefone: string;
+  };
 }
 
-export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentConfirmed }: PixPaymentModalProps) => {
+export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentConfirmed, userData }: PixPaymentModalProps) => {
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
@@ -51,15 +57,42 @@ export const PixPaymentModal = ({ isOpen, onClose, pixCode, amount, onPaymentCon
     }
   };
 
-  const handlePaymentConfirmed = () => {
-    toast({
-      title: "Pagamento confirmado!",
-      description: "Obrigado pela sua contribuição. Entraremos em contato em breve.",
-    });
-    if (onPaymentConfirmed) {
-      onPaymentConfirmed();
+  const handlePaymentConfirmed = async () => {
+    try {
+      // Send payment log with pagou_pix = true
+      if (userData) {
+        const { error: logError } = await supabase.functions.invoke('log-payment', {
+          body: {
+            name: userData.name,
+            email: userData.email,
+            telefone: userData.telefone,
+            payment_method: "a vista pix",
+            pagou_pix: true
+          }
+        });
+
+        if (logError) {
+          console.error("Error logging payment:", logError);
+        }
+      }
+
+      toast({
+        title: "Pagamento confirmado!",
+        description: "Obrigado pela sua contribuição. Entraremos em contato em breve.",
+      });
+      
+      if (onPaymentConfirmed) {
+        onPaymentConfirmed();
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      toast({
+        title: "Erro ao confirmar pagamento",
+        description: "Tente novamente ou entre em contato.",
+        variant: "destructive"
+      });
     }
-    onClose();
   };
 
   return (

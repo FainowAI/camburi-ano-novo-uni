@@ -126,20 +126,6 @@ export const DonationForm = () => {
 
       console.log("Logging payment selection and initiating one-time Stripe payment with data:", formData);
       
-      // Log payment selection (keep for compatibility)
-      const { error: logError } = await supabase.functions.invoke('log-payment', {
-        body: {
-          name: formData.name,
-          email: formData.email,
-          telefone: formData.telefone,
-          payment_method: "a vista pix"
-        }
-      });
-
-      if (logError) {
-        console.error("Error logging payment:", logError);
-      }
-
       // Track checkout initiation
       await trackEvent('checkout_started', {
         payment_method: 'pix',
@@ -574,6 +560,11 @@ export const DonationForm = () => {
         onClose={() => setShowPixModal(false)}
         pixCode={PIX_CODE}
         amount={810}
+        userData={{
+          name: formData.name,
+          email: formData.email,
+          telefone: formData.telefone
+        }}
         onPaymentConfirmed={() => {
           // Aqui você pode adicionar lógica adicional após confirmação do pagamento
           console.log('Pagamento PIX confirmado pelo usuário');
