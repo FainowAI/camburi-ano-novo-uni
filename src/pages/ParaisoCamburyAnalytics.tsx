@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { RefreshCcw, Download, Users, CreditCard, TrendingUp, TrendingDown, Activity, Target } from "lucide-react";
+import { RefreshCcw, Download, Users, CreditCard, TrendingUp, TrendingDown, Activity, Target, MousePointer, Clock, Eye, DollarSign, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import AdminHeader from "@/components/AdminHeader";
@@ -36,10 +36,33 @@ interface CheckoutEvent {
 
 interface FunnelMetrics {
   total_sessions: number;
-  payment_type_selected: number;
+  form_fields_completed: number;
   form_submitted: number;
-  checkout_started: number;
-  redirected_to_stripe: number;
+  pix_modal_opened: number;
+  pix_payment_confirmed: number;
+  pix_modal_closed: number;
+  payment_type_selected: number;
+  abandonment_rate: number;
+}
+
+interface EventTypeMetrics {
+  event_type: string;
+  count: number;
+  percentage: number;
+  avg_time_to_event?: number;
+}
+
+interface SessionAnalytics {
+  total_unique_sessions: number;
+  avg_session_duration: number;
+  bounce_rate: number;
+  conversion_funnel: {
+    visitors: number;
+    form_completions: number;
+    payment_selections: number;
+    pix_opens: number;
+    pix_confirmations: number;
+  };
 }
 
 interface ConversionMetrics {
@@ -54,6 +77,19 @@ interface ConversionMetrics {
 const ParaisoCamburyAnalytics = () => {
   const [paymentLogs, setPaymentLogs] = useState<PaymentLog[]>([]);
   const [checkoutEvents, setCheckoutEvents] = useState<CheckoutEvent[]>([]);
+  const [eventTypeMetrics, setEventTypeMetrics] = useState<EventTypeMetrics[]>([]);
+  const [sessionAnalytics, setSessionAnalytics] = useState<SessionAnalytics>({
+    total_unique_sessions: 0,
+    avg_session_duration: 0,
+    bounce_rate: 0,
+    conversion_funnel: {
+      visitors: 0,
+      form_completions: 0,
+      payment_selections: 0,
+      pix_opens: 0,
+      pix_confirmations: 0,
+    },
+  });
   const [metrics, setMetrics] = useState<ConversionMetrics>({
     total_visits: 0,
     form_submissions: 0,
@@ -64,10 +100,13 @@ const ParaisoCamburyAnalytics = () => {
   });
   const [funnelMetrics, setFunnelMetrics] = useState<FunnelMetrics>({
     total_sessions: 0,
-    payment_type_selected: 0,
+    form_fields_completed: 0,
     form_submitted: 0,
-    checkout_started: 0,
-    redirected_to_stripe: 0,
+    pix_modal_opened: 0,
+    pix_payment_confirmed: 0,
+    pix_modal_closed: 0,
+    payment_type_selected: 0,
+    abandonment_rate: 0,
   });
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -87,7 +126,7 @@ const ParaisoCamburyAnalytics = () => {
       setPaymentLogs(logsResponse.data || []);
       setCheckoutEvents(eventsResponse.data || []);
       
-      // Calculate metrics
+      // Calculate advanced metrics
       const logs = logsResponse.data || [];
       const events = eventsResponse.data || [];
       
@@ -105,19 +144,75 @@ const ParaisoCamburyAnalytics = () => {
         average_order_value: conversions > 0 ? revenue / conversions : 0,
       });
 
-      // Calculate funnel metrics
+      // Calculate detailed funnel metrics
       const uniqueSessions = new Set(events.map(e => e.session_id)).size;
-      const paymentSelected = events.filter(e => e.event_type === 'payment_type_selected').length;
+      const formFieldsCompleted = events.filter(e => e.event_type === 'form_field_completed').length;
       const formSubmitted = events.filter(e => e.event_type === 'form_submitted').length;
-      const checkoutStarted = events.filter(e => e.event_type === 'checkout_started').length;
-      const redirectedToStripe = events.filter(e => e.event_type === 'redirected_to_stripe').length;
+      const pixModalOpened = events.filter(e => e.event_type === 'pix_modal_opened').length;
+      const pixPaymentConfirmed = events.filter(e => e.event_type === 'pix_payment_confirmed').length;
+      const pixModalClosed = events.filter(e => e.event_type === 'pix_modal_closed').length;
+      const paymentTypeSelected = events.filter(e => e.event_type === 'payment_type_selected').length;
+
+      const abandonmentRate = pixModalOpened > 0 ? 
+        ((pixModalOpened - pixPaymentConfirmed) / pixModalOpened) * 100 : 0;
 
       setFunnelMetrics({
         total_sessions: uniqueSessions,
-        payment_type_selected: paymentSelected,
+        form_fields_completed: formFieldsCompleted,
         form_submitted: formSubmitted,
-        checkout_started: checkoutStarted,
-        redirected_to_stripe: redirectedToStripe,
+        pix_modal_opened: pixModalOpened,
+        pix_payment_confirmed: pixPaymentConfirmed,
+        pix_modal_closed: pixModalClosed,
+        payment_type_selected: paymentTypeSelected,
+        abandonment_rate: abandonmentRate,
+      });
+
+      // Calculate event type metrics
+      const eventTypeCounts = events.reduce((acc, event) => {
+        acc[event.event_type] = (acc[event.event_type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const totalEvents = events.length;
+      const eventMetrics = Object.entries(eventTypeCounts)
+        .map(([event_type, count]) => ({
+          event_type,
+          count,
+          percentage: totalEvents > 0 ? (count / totalEvents) * 100 : 0,
+        }))
+        .sort((a, b) => b.count - a.count);
+
+      setEventTypeMetrics(eventMetrics);
+
+      // Calculate session analytics
+      const sessionData = events.reduce((acc, event) => {
+        if (!acc[event.session_id]) {
+          acc[event.session_id] = {
+            start_time: new Date(event.created_at),
+            end_time: new Date(event.created_at),
+            events: []
+          };
+        }
+        acc[event.session_id].events.push(event);
+        acc[event.session_id].end_time = new Date(event.created_at);
+        return acc;
+      }, {} as Record<string, any>);
+
+      const avgSessionDuration = Object.values(sessionData).reduce((total: number, session: any) => {
+        return total + (session.end_time.getTime() - session.start_time.getTime());
+      }, 0) / Math.max(uniqueSessions, 1);
+
+      setSessionAnalytics({
+        total_unique_sessions: uniqueSessions,
+        avg_session_duration: avgSessionDuration / (1000 * 60), // Convert to minutes
+        bounce_rate: 0, // Will calculate based on single-event sessions
+        conversion_funnel: {
+          visitors: uniqueSessions,
+          form_completions: new Set(events.filter(e => e.event_type === 'form_submitted').map(e => e.session_id)).size,
+          payment_selections: new Set(events.filter(e => e.event_type === 'payment_type_selected').map(e => e.session_id)).size,
+          pix_opens: new Set(events.filter(e => e.event_type === 'pix_modal_opened').map(e => e.session_id)).size,
+          pix_confirmations: new Set(events.filter(e => e.event_type === 'pix_payment_confirmed').map(e => e.session_id)).size,
+        },
       });
       
     } catch (error) {
@@ -211,10 +306,10 @@ const ParaisoCamburyAnalytics = () => {
             <div className="space-y-4">
               {[
                 { name: 'Sessões Únicas', value: funnelMetrics.total_sessions, percentage: 100 },
-                { name: 'Método Selecionado', value: funnelMetrics.payment_type_selected, percentage: (funnelMetrics.payment_type_selected / funnelMetrics.total_sessions) * 100 },
-                { name: 'Formulário Enviado', value: funnelMetrics.form_submitted, percentage: (funnelMetrics.form_submitted / funnelMetrics.total_sessions) * 100 },
-                { name: 'Checkout Iniciado', value: funnelMetrics.checkout_started, percentage: (funnelMetrics.checkout_started / funnelMetrics.total_sessions) * 100 },
-                { name: 'Redirecionado Stripe', value: funnelMetrics.redirected_to_stripe, percentage: (funnelMetrics.redirected_to_stripe / funnelMetrics.total_sessions) * 100 },
+                { name: 'Campos Preenchidos', value: funnelMetrics.form_fields_completed, percentage: (funnelMetrics.form_fields_completed / Math.max(funnelMetrics.total_sessions, 1)) * 100 },
+                { name: 'Formulário Enviado', value: funnelMetrics.form_submitted, percentage: (funnelMetrics.form_submitted / Math.max(funnelMetrics.total_sessions, 1)) * 100 },
+                { name: 'Modal PIX Aberto', value: funnelMetrics.pix_modal_opened, percentage: (funnelMetrics.pix_modal_opened / Math.max(funnelMetrics.total_sessions, 1)) * 100 },
+                { name: 'PIX Confirmado', value: funnelMetrics.pix_payment_confirmed, percentage: (funnelMetrics.pix_payment_confirmed / Math.max(funnelMetrics.total_sessions, 1)) * 100 },
               ].map((step, index) => (
                 <div key={step.name} className="flex items-center space-x-4">
                   <div className="w-32 text-sm font-medium">{step.name}</div>
@@ -224,8 +319,114 @@ const ParaisoCamburyAnalytics = () => {
                   <div className="w-20 text-sm text-right">
                     {step.value} ({isNaN(step.percentage) ? 0 : step.percentage.toFixed(1)}%)
                   </div>
+                  {index < 4 && (
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  )}
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* New Event Analytics Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Event Type Distribution */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Distribuição de Eventos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {eventTypeMetrics.slice(0, 8).map((metric) => (
+                  <div key={metric.event_type} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-primary" />
+                      <span className="text-sm font-medium capitalize">
+                        {metric.event_type.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary">{metric.count}</Badge>
+                      <span className="text-xs text-muted-foreground w-12">
+                        {metric.percentage.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Session Analytics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Análise de Sessões
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Sessões Únicas</p>
+                    <p className="text-2xl font-bold">{sessionAnalytics.total_unique_sessions}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Duração Média</p>
+                    <p className="text-2xl font-bold">{sessionAnalytics.avg_session_duration.toFixed(1)}min</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Funil de Conversão por Sessão</p>
+                  <div className="space-y-2">
+                    {[
+                      { label: 'Visitantes', value: sessionAnalytics.conversion_funnel.visitors },
+                      { label: 'Formulários Completos', value: sessionAnalytics.conversion_funnel.form_completions },
+                      { label: 'Pagamentos Selecionados', value: sessionAnalytics.conversion_funnel.payment_selections },
+                      { label: 'PIX Aberto', value: sessionAnalytics.conversion_funnel.pix_opens },
+                      { label: 'PIX Confirmado', value: sessionAnalytics.conversion_funnel.pix_confirmations },
+                    ].map((item) => (
+                      <div key={item.label} className="flex justify-between text-sm">
+                        <span>{item.label}</span>
+                        <Badge variant="outline">{item.value}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Abandonment Analysis */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingDown className="h-5 w-5" />
+              Análise de Abandono
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Taxa de Abandono PIX</p>
+                <p className="text-2xl font-bold text-destructive">
+                  {funnelMetrics.abandonment_rate.toFixed(1)}%
+                </p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Modal PIX Fechado</p>
+                <p className="text-2xl font-bold">{funnelMetrics.pix_modal_closed}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Tipos de Pagamento</p>
+                <p className="text-2xl font-bold">{funnelMetrics.payment_type_selected}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -234,6 +435,7 @@ const ParaisoCamburyAnalytics = () => {
           <TabsList>
             <TabsTrigger value="payments">Pagamentos</TabsTrigger>
             <TabsTrigger value="events">Eventos de Checkout</TabsTrigger>
+            <TabsTrigger value="detailed">Análise Detalhada</TabsTrigger>
           </TabsList>
 
           <TabsContent value="payments" className="space-y-4">
@@ -325,6 +527,151 @@ const ParaisoCamburyAnalytics = () => {
                           </TableCell>
                           <TableCell>
                             {new Date(event.created_at).toLocaleString('pt-BR')}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="detailed" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Real-time Event Stream */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Stream de Eventos Recentes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 max-h-96 overflow-auto">
+                    {checkoutEvents.slice(0, 20).map((event) => (
+                      <div key={event.id} className="flex items-center justify-between p-2 border rounded-sm">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {event.event_type}
+                          </Badge>
+                          <span className="text-sm">
+                            {event.user_name || event.user_email || 'Anônimo'}
+                          </span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(event.created_at).toLocaleTimeString('pt-BR')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Event Metadata Analysis */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Análise de Metadados</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* PIX Events Analysis */}
+                    <div>
+                      <h4 className="font-medium mb-2">Eventos PIX</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Modal Aberto:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'pix_modal_opened').length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Pagamento Confirmado:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'pix_payment_confirmed').length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Modal Fechado:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'pix_modal_closed').length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Código Copiado:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'pix_code_copied').length}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Form Interaction Analysis */}
+                    <div>
+                      <h4 className="font-medium mb-2">Interações do Formulário</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Campos Preenchidos:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'form_field_completed').length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Formulários Enviados:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'form_submitted').length}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Session Behavior */}
+                    <div>
+                      <h4 className="font-medium mb-2">Comportamento de Sessão</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>Páginas Carregadas:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'page_loaded').length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Tabs Ocultas:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'tab_hidden').length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Tabs Visíveis:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'tab_visible').length}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Scroll Depth:</span>
+                          <span>{checkoutEvents.filter(e => e.event_type === 'scroll_depth').length}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed Event Timeline */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Timeline Detalhada de Eventos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-auto max-h-96">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Timestamp</TableHead>
+                        <TableHead>Tipo de Evento</TableHead>
+                        <TableHead>Usuário</TableHead>
+                        <TableHead>Sessão</TableHead>
+                        <TableHead>Metadados</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {checkoutEvents.slice(0, 50).map((event) => (
+                        <TableRow key={event.id}>
+                          <TableCell className="text-xs">
+                            {new Date(event.created_at).toLocaleString('pt-BR')}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="text-xs">
+                              {event.event_type}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {event.user_name || event.user_email || '-'}
+                          </TableCell>
+                          <TableCell className="text-xs font-mono">
+                            {event.session_id.substring(0, 8)}...
+                          </TableCell>
+                          <TableCell className="text-xs max-w-xs truncate">
+                            {event.metadata ? JSON.stringify(event.metadata).substring(0, 100) + '...' : '-'}
                           </TableCell>
                         </TableRow>
                       ))}
