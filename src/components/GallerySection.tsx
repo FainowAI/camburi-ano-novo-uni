@@ -15,7 +15,7 @@ interface Photo {
 const photoLegendas: Record<string, string> = {
   "festa-1.jpg": "Carnaval 2025",
   "festa-2.jpg": "Carnaval 2024", 
-  "festa-3.jpg": "Final de ano 2024",
+  "festa-3.jpg": "Ano novo 2025",
 };
 
 
