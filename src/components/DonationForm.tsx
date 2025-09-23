@@ -38,7 +38,7 @@ export const DonationForm = () => {
           event_type: eventType,
           user_name: formData.name || null,
           user_email: formData.email || null,
-          user_cpf: formData.cpf || null,
+          user_cpf: null,
           metadata: {
             timestamp: new Date().toISOString(),
             ...additionalData
@@ -132,7 +132,7 @@ export const DonationForm = () => {
           name: formData.name,
           email: formData.email,
           telefone: formData.telefone,
-          payment_method: "à vista"
+          payment_method: "a vista pix"
         }
       });
 
