@@ -29,10 +29,10 @@ serve(async (req) => {
       throw new Error("Missing required fields: name, email, and payment_method are required");
     }
 
-    // Create Supabase client
+    // Create Supabase client with service role key to bypass RLS
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
     // Insert payment log with all provided fields
