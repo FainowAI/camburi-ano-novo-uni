@@ -244,7 +244,7 @@ const ParaisoCamburyAnalytics = () => {
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Visitas Totais</CardTitle>
@@ -274,21 +274,6 @@ const ParaisoCamburyAnalytics = () => {
               <div className="text-2xl font-bold">{metrics.conversions}</div>
               <p className="text-xs text-muted-foreground">
                 {metrics.conversion_rate.toFixed(2)}% taxa de conversão
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-              <CreditCard className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                R$ {metrics.revenue.toLocaleString('pt-BR')}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Ticket médio: R$ {metrics.average_order_value.toFixed(0)}
               </p>
             </CardContent>
           </Card>
