@@ -32,59 +32,7 @@ export const useGranularAnalytics = () => {
   const formInteractionStartTime = useRef<number | null>(null);
   const [userInfo, setUserInfo] = useState({ name: '', email: '' });
 
-  // Track page load
-  useEffect(() => {
-    trackEvent('page_loaded', {
-      device_info: {
-        screen_width: window.screen.width,
-        screen_height: window.screen.height,
-        user_agent: navigator.userAgent,
-        language: navigator.language,
-      },
-      referrer: document.referrer,
-      url: window.location.href,
-    });
-
-    // Track scroll depth
-    const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollDepth = Math.round((scrollTop / documentHeight) * 100);
-      
-      if (scrollDepth > lastScrollDepth.current) {
-        lastScrollDepth.current = scrollDepth;
-        // Only track significant scroll milestones
-        if (scrollDepth >= 25 && scrollDepth % 25 === 0) {
-          trackEvent('scroll_depth', { scroll_depth: scrollDepth });
-        }
-      }
-    };
-
-    // Track time on page before unload
-    const handleBeforeUnload = () => {
-      const timeOnPage = Date.now() - pageLoadTime.current;
-      trackEvent('session_end', { time_on_page: timeOnPage });
-    };
-
-    // Track visibility change (tab switching)
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        trackEvent('tab_hidden', { time_on_page: Date.now() - pageLoadTime.current });
-      } else {
-        trackEvent('tab_visible', { time_on_page: Date.now() - pageLoadTime.current });
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  // Removed page visibility and scroll tracking events - only payment events needed
 
   const trackEvent = useCallback(async (eventType: string, additionalData: AnalyticsData = {}) => {
     try {
