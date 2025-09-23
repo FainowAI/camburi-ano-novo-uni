@@ -41,6 +41,7 @@ export const useGranularAnalytics = () => {
         event_type: eventType,
         user_name: userInfo.name || null,
         user_email: userInfo.email || null,
+        payment_method: additionalData.payment_method || null,
         metadata: {
           timestamp: new Date().toISOString(),
           time_since_load: Date.now() - pageLoadTime.current,

@@ -21,8 +21,8 @@ serve(async (req) => {
     logStep("Function started");
 
     // Parse request body
-    const { name, email, cpf, payment_method } = await req.json();
-    logStep("Request data received", { name, email, cpf, payment_method });
+    const { name, email, telefone, payment_method, pagou_pix } = await req.json();
+    logStep("Request data received", { name, email, telefone, payment_method, pagou_pix });
 
     // Validate required fields
     if (!name || !email || !payment_method) {
@@ -35,16 +35,19 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    // Insert payment log
+    // Insert payment log with all provided fields
+    const paymentData = {
+      name,
+      email,
+      telefone: telefone || null,
+      payment_method,
+      aceitou: true,
+      ...(pagou_pix !== undefined && { pagou_pix })
+    };
+
     const { data, error } = await supabaseClient
       .from('payment_logs')
-      .insert({
-        name,
-        email,
-        cpf: cpf || null,
-        payment_method,
-        aceitou: true
-      })
+      .insert(paymentData)
       .select()
       .single();
 
