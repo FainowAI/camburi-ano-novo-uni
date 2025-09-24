@@ -22,18 +22,18 @@ const photoLegendas: Record<string, string> = {
 const destaques = [
   {
     icon: Users,
-    valor: "+300 pessoas",
-    descricao: "já participaram"
+    valor: "Mais de 300 corações juntos",
+    descricao: "Pessoas já participaram das nossas ações"
   },
   {
     icon: Leaf,
-    valor: "50kg de lixo",
-    descricao: "recolhidos em ações na praia"
+    valor: "Praias mais limpas e preservadas",
+    descricao: "Mutirões retiram toneladas de resíduos do território"
   },
   {
     icon: Calendar,
-    valor: "4 anos",
-    descricao: "de tradição"
+    valor: "4 anos de histórias e união",
+    descricao: "Tradição de cuidado e celebração em Cambury"
   }
 ];
 
@@ -227,15 +227,17 @@ export const GallerySection = ({ onScrollToForm }: GallerySectionProps) => {
         }`}>
           <div className="bg-primary/5 border border-primary/20 rounded-lg p-8 max-w-3xl mx-auto mb-8">
             <p className="text-lg text-foreground mb-6 leading-relaxed">
-              Cada contribuição ajuda a escrever o próximo capítulo dessa história. 
-              Venha fazer parte da nossa festa de fim de ano!
+              Cada apoio é uma semente de transformação
+            </p>
+            <p className="text-base text-muted-foreground mb-6 leading-relaxed">
+              Venha escrever conosco o próximo capítulo dessa história e celebrar a vida em Cambury!
             </p>
             <Button
               onClick={onScrollToForm}
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-montserrat font-semibold px-8 py-3 mb-6"
+              className="bg-unne-green hover:bg-unne-green/90 text-white font-montserrat font-semibold px-8 py-3 mb-6"
             >
-              Quero apoiar a próxima festa
+              Quero fazer parte dessa festa
             </Button>
           </div>
           
