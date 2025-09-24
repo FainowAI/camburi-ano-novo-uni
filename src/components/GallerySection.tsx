@@ -22,13 +22,13 @@ const photoLegendas: Record<string, string> = {
 const destaques = [
   {
     icon: Users,
-    valor: "Mais de 300 corações juntos",
+    valor: "Corações unidos por Cambury",
     descricao: "Pessoas já participaram das nossas ações"
   },
   {
     icon: Leaf,
     valor: "Praias mais limpas e preservadas",
-    descricao: "Mutirões retiram toneladas de resíduos do território"
+    descricao: "Mutirões cuidam e preservam nosso território"
   },
   {
     icon: Calendar,
