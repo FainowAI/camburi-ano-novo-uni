@@ -375,7 +375,7 @@ export const DonationForm = () => {
                         htmlFor="donation-confirmation-1" 
                         className="text-sm text-gray-700 cursor-pointer"
                       >
-                        Ao aceitar confirmo que estou fazendo uma <span className="text-green-600 font-medium">doação</span> para a UNNE Cambury
+                        Ao aceitar, confirmo que estou fazendo uma doação
                       </Label>
                     </div>
                     
